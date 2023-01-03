@@ -6,11 +6,17 @@ export interface ErrorPayload {
   message: string
 }
 
-export interface NhostGraphqlConstructorParams {
+export interface NhostGraphqlConstructorParams<
+  GeneratedSchema extends { query: object; mutation: object; subscription: object }
+> {
   /**
    * GraphQL endpoint.
    */
   url: string
+  /**
+   * Generated schema. When set, it is used to provide type safety for the `query` and `mutation` methods.
+   */
+  generatedSchema?: GeneratedSchema
   /**
    * Admin secret. When set, it is sent as an `x-hasura-admin-secret` header for all requests.
    */

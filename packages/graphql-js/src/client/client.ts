@@ -10,13 +10,19 @@ import {
 /**
  * @alias GraphQL
  */
-export class NhostGraphqlClient {
+export class NhostGraphQlClient<
+  GeneratedSchema extends { query: object; mutation: object; subscription: object } = any
+> {
   readonly url: string
   private instance: AxiosInstance
   private accessToken: string | null
   private adminSecret?: string
 
-  constructor(params: NhostGraphqlConstructorParams) {
+  query: GeneratedSchema['query']
+  mutation: GeneratedSchema['mutation']
+  subscription: GeneratedSchema['subscription']
+
+  constructor(params: NhostGraphqlConstructorParams<GeneratedSchema>) {
     const { url, adminSecret } = params
 
     this.url = url
@@ -25,6 +31,11 @@ export class NhostGraphqlClient {
     this.instance = axios.create({
       baseURL: url
     })
+
+    this.query = params.generatedSchema?.query || ({} as GeneratedSchema['query'])
+    this.mutation = params?.generatedSchema?.mutation || ({} as GeneratedSchema['mutation'])
+    this.subscription =
+      params?.generatedSchema?.subscription || ({} as GeneratedSchema['subscription'])
   }
 
   /** @deprecated Axios will be replaced by cross-fetch in the near future. Only the headers configuration will be kept. */
