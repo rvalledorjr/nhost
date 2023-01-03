@@ -4,7 +4,7 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "umd/**", "build/**", ".next/**"]
+      "outputs": [".svelte-kit/**", "dist/**", "umd/**", "build/**", ".next/**"]
     },
     "@nhost-examples/react-apollo#build": {
       "dependsOn": ["^build"],
