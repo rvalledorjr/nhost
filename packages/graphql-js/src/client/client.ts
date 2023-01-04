@@ -1,28 +1,144 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
-import { DocumentNode, GraphQLError, print } from 'graphql'
+import { DocumentNode, GraphQLError, parse, print } from 'graphql'
+import pascalCase from 'just-pascal-case'
 import {
   DeprecatedNhostGraphqlRequestResponse,
+  GenericGeneratedSchema,
   NhostGraphqlConstructorParams,
   NhostGraphqlRequestConfig,
   NhostGraphqlRequestResponse
 } from './client.types'
 
+export function prepareReturnValues(
+  { query: generatedQueries, ...generatedSchema }: GenericGeneratedSchema,
+  key: string,
+  previousKey?: string,
+  existingKeys: string[] = []
+): string[] {
+  console.log(generatedQueries)
+  const currentQuery = generatedSchema[generatedQueries[key].__type] || generatedSchema[key]
+  const availableReturnValues = Object.keys(currentQuery || {})
+
+  const { scalar, nonScalar } = availableReturnValues.reduce(
+    (currentValues, returnValue) => {
+      const type = currentQuery[returnValue].__type.replace(/(!|\[|\])/g, '')
+
+      if (Object.keys(generatedSchema).includes(type)) {
+        if (existingKeys.includes(type)) {
+          return currentValues
+        }
+
+        return {
+          ...currentValues,
+          nonScalar: [...currentValues.nonScalar, type]
+        }
+      }
+
+      return {
+        ...currentValues,
+        scalar: [
+          ...currentValues.scalar,
+          previousKey ? `${previousKey}.${returnValue}` : returnValue
+        ]
+      }
+    },
+    { scalar: [] as string[], nonScalar: [] as string[] }
+  )
+
+  console.log(nonScalar)
+
+  return [
+    ...scalar,
+    ...nonScalar.map(
+      (val) =>
+        `${previousKey}.${prepareReturnValues(
+          { query: generatedQueries, ...generatedSchema },
+          val,
+          `${previousKey}.${val}`,
+          [...existingKeys, val]
+        )}`
+    )
+  ]
+}
+
+function createQueryClient<Q extends object = any>({
+  query: generatedQueries,
+  ...generatedSchema
+}: GenericGeneratedSchema) {
+  return Object.keys(generatedQueries).reduce(
+    (queryClient, queryName) => ({
+      ...queryClient,
+      [queryName]: (args?: typeof generatedQueries[typeof queryName]['__args']) => {
+        return {
+          returnAll: () => {
+            console.log()
+            const currentQuery = generatedSchema[generatedQueries[queryName].__type]
+            const availableReturnValues = Object.keys(currentQuery)
+
+            const { scalar, nonScalar } = availableReturnValues.reduce(
+              (currentValues, returnValue) => {
+                const type = currentQuery[returnValue].__type.replace(/(!|\[|\])/g, '')
+
+                if (Object.keys(generatedSchema).includes(type)) {
+                  return {
+                    ...currentValues,
+                    nonScalar: [...currentValues.nonScalar, returnValue]
+                  }
+                }
+
+                return {
+                  ...currentValues,
+                  scalar: [...currentValues.scalar, returnValue]
+                }
+              },
+              { scalar: [] as string[], nonScalar: [] as string[] }
+            )
+
+            // console.log(nonScalar.map((val) => currentQuery[val].__type.replace(/(!|\[|\])/g, '')))
+
+            return print(
+              parse(
+                `query ${pascalCase(queryName)}${
+                  args
+                    ? `(${Object.keys(args)
+                        .map((key) => `$${key}: ${generatedQueries[queryName].__args?.[key]}`)
+                        .join(', ')})`
+                    : ''
+                } { ${queryName}${
+                  args
+                    ? `(${Object.keys(args)
+                        .map((key) => `${key}: $${key}`)
+                        .join(', ')})`
+                    : ''
+                } { ${scalar.join(' ')} }}`
+              )
+            )
+          }
+        }
+      }
+    }),
+    {} as Q
+  )
+}
+
 /**
  * @alias GraphQL
  */
 export class NhostGraphQlClient<
-  GeneratedSchema extends { query: object; mutation: object; subscription: object } = any
+  GeneratedQuery extends object = any,
+  GeneratedMutation extends object = any,
+  GeneratedSubscription extends object = any
 > {
   readonly url: string
   private instance: AxiosInstance
   private accessToken: string | null
   private adminSecret?: string
 
-  query: GeneratedSchema['query']
-  mutation: GeneratedSchema['mutation']
-  subscription: GeneratedSchema['subscription']
+  query?: GeneratedQuery
+  mutation?: GeneratedMutation
+  subscription?: GeneratedSubscription
 
-  constructor(params: NhostGraphqlConstructorParams<GeneratedSchema>) {
+  constructor(params: NhostGraphqlConstructorParams) {
     const { url, adminSecret } = params
 
     this.url = url
@@ -32,10 +148,9 @@ export class NhostGraphQlClient<
       baseURL: url
     })
 
-    this.query = params.generatedSchema?.query || ({} as GeneratedSchema['query'])
-    this.mutation = params?.generatedSchema?.mutation || ({} as GeneratedSchema['mutation'])
-    this.subscription =
-      params?.generatedSchema?.subscription || ({} as GeneratedSchema['subscription'])
+    this.query = params.generatedSchema
+      ? createQueryClient<GeneratedQuery>(params.generatedSchema)
+      : undefined
   }
 
   /** @deprecated Axios will be replaced by cross-fetch in the near future. Only the headers configuration will be kept. */
