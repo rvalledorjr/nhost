@@ -1,22 +1,23 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 import { DocumentNode, GraphQLError, parse, print } from 'graphql'
 import pascalCase from 'just-pascal-case'
-import {
+import type {
+  BaseGeneratedSchema,
   DeprecatedNhostGraphqlRequestResponse,
-  GenericGeneratedSchema,
   NhostGraphqlConstructorParams,
   NhostGraphqlRequestConfig,
   NhostGraphqlRequestResponse
 } from './client.types'
 
-export function prepareReturnValues(
-  { query: generatedQueries, ...generatedSchema }: GenericGeneratedSchema,
-  key: string,
+export function prepareFields<S extends BaseGeneratedSchema = any>(
+  generatedSchema: S,
+  key: keyof S,
   previousKey?: string,
   existingKeys: string[] = []
-): string[] {
-  console.log(generatedQueries)
-  const currentQuery = generatedSchema[generatedQueries[key].__type] || generatedSchema[key]
+) {
+  const { query: generatedQueries } = generatedSchema
+  const currentQuery =
+    generatedSchema[generatedQueries[key as string]?.__type?.replace(/(!|\[|\])/g, '')]
   const availableReturnValues = Object.keys(currentQuery || {})
 
   const { scalar, nonScalar } = availableReturnValues.reduce(
@@ -45,57 +46,60 @@ export function prepareReturnValues(
     { scalar: [] as string[], nonScalar: [] as string[] }
   )
 
-  console.log(nonScalar)
-
-  return [
-    ...scalar,
-    ...nonScalar.map(
-      (val) =>
-        `${previousKey}.${prepareReturnValues(
-          { query: generatedQueries, ...generatedSchema },
-          val,
-          `${previousKey}.${val}`,
-          [...existingKeys, val]
-        )}`
-    )
-  ]
+  return { scalar, nonScalar }
 }
 
-function createQueryClient<Q extends object = any>({
-  query: generatedQueries,
-  ...generatedSchema
-}: GenericGeneratedSchema) {
+function createQueryClient<Q extends object = any>(generatedSchema: BaseGeneratedSchema) {
+  const { query: generatedQueries } = generatedSchema
+
   return Object.keys(generatedQueries).reduce(
     (queryClient, queryName) => ({
       ...queryClient,
       [queryName]: (args?: typeof generatedQueries[typeof queryName]['__args']) => {
+        const { scalar: scalarFields, nonScalar: nonScalarFields } = prepareFields(
+          generatedSchema,
+          queryName
+        )
+
         return {
-          returnAll: () => {
-            console.log()
-            const currentQuery = generatedSchema[generatedQueries[queryName].__type]
-            const availableReturnValues = Object.keys(currentQuery)
+          ...nonScalarFields.reduce(
+            (currentFunctions, nonScalarField) => ({
+              ...currentFunctions,
+              [nonScalarField]: (
+                nestedArgs?: typeof generatedQueries[typeof nonScalarField]['__args']
+              ) => {
+                return {
+                  returnAll: () => {
+                    const { scalar: nestedScalarFields, nonScalar: nestedNonScalarFields } =
+                      prepareFields(generatedSchema, nonScalarField)
 
-            const { scalar, nonScalar } = availableReturnValues.reduce(
-              (currentValues, returnValue) => {
-                const type = currentQuery[returnValue].__type.replace(/(!|\[|\])/g, '')
-
-                if (Object.keys(generatedSchema).includes(type)) {
-                  return {
-                    ...currentValues,
-                    nonScalar: [...currentValues.nonScalar, returnValue]
+                    return print(
+                      parse(
+                        `query ${pascalCase(nonScalarField)}${
+                          nestedArgs
+                            ? `(${Object.keys(nestedArgs)
+                                .map(
+                                  (key) =>
+                                    `$${key}: ${generatedQueries[nonScalarField].__args?.[key]}`
+                                )
+                                .join(', ')})`
+                            : ''
+                        } { ${nonScalarField}${
+                          nestedArgs
+                            ? `(${Object.keys(nestedArgs)
+                                .map((key) => `${key}: $${key}`)
+                                .join(', ')})`
+                            : ''
+                        } { ${nestedScalarFields.join(' ')} }}`
+                      )
+                    )
                   }
                 }
-
-                return {
-                  ...currentValues,
-                  scalar: [...currentValues.scalar, returnValue]
-                }
-              },
-              { scalar: [] as string[], nonScalar: [] as string[] }
-            )
-
-            // console.log(nonScalar.map((val) => currentQuery[val].__type.replace(/(!|\[|\])/g, '')))
-
+              }
+            }),
+            {}
+          ),
+          returnAll: () => {
             return print(
               parse(
                 `query ${pascalCase(queryName)}${
@@ -110,7 +114,7 @@ function createQueryClient<Q extends object = any>({
                         .map((key) => `${key}: $${key}`)
                         .join(', ')})`
                     : ''
-                } { ${scalar.join(' ')} }}`
+                } { ${scalarFields.join(' ')} }}`
               )
             )
           }
