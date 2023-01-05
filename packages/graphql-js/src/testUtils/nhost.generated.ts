@@ -3322,6 +3322,14 @@ export type Maybe<T> = T | null
 
 export type Enumerable<T> = T | Array<T>
 
+export type TruthyKeys<T> = keyof {
+  [K in keyof T as T[K] extends false | undefined | null ? never : K]: K
+}
+
+export type SelectSubset<T, U> = {
+  [key in keyof T]: key extends keyof U ? T[key] : never
+}
+
 export interface Scalars {
   ID: string
   String: string
@@ -3457,7 +3465,35 @@ export interface PostArgs extends ListQueryArgs<Post> {
   select?: PostSelect
 }
 
+export type PostPayload<S extends boolean | null | undefined | PostArgs> = S extends true
+  ? Post
+  : S extends undefined
+  ? never
+  : S extends { select: any } & PostArgs
+  ? {
+      [P in TruthyKeys<S['select']>]: P extends 'author'
+        ? AuthorPayload<S['select'][P]>
+        : P extends keyof Post
+        ? Post[P]
+        : never
+    }
+  : Post
+
+export type AuthorPayload<S extends boolean | null | undefined | AuthorArgs> = S extends true
+  ? Author
+  : S extends undefined
+  ? never
+  : S extends { select: any } & AuthorArgs
+  ? {
+      [P in TruthyKeys<S['select']>]: P extends 'posts'
+        ? Array<PostPayload<S['select'][P]>>
+        : P extends keyof Author
+        ? Author[P]
+        : never
+    }
+  : Author
+
 export interface Query {
-  authors: (args?: AuthorArgs) => Promise<Partial<Author>[]>
-  posts: (args?: PostArgs) => Promise<Partial<Post>[]>
+  authors: <T extends AuthorArgs>(args?: SelectSubset<T, AuthorArgs>) => Promise<AuthorPayload<T>[]>
+  posts: <T extends PostArgs>(args?: SelectSubset<T, PostArgs>) => Promise<PostPayload<T>[]>
 }
