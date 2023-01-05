@@ -4,7 +4,7 @@ import {
   NhostGraphqlRequestConfig,
   NhostGraphqlRequestResponse
 } from '../../client/client.types'
-import generateGraphQlQuery from '../generateGraphQlQuery'
+import generateGraphqlQuery from '../generateGraphqlQuery'
 import prepareQueryFields from '../prepareQueryFields'
 
 export type FetchFunction = <T = any, V = any>(
@@ -28,7 +28,7 @@ export default function createQueryClient<Q extends object = any>(
       ...queryClient,
       [queryName]: (args?: typeof generatedQueries[typeof queryName]['__args']) => {
         const { scalar: scalarFields } = prepareQueryFields(generatedSchema, queryName)
-        const graphQlQuery = generateGraphQlQuery({
+        const graphqlQuery = generateGraphqlQuery({
           name: queryName,
           returnFields: scalarFields,
           args: Object.keys(args || {}).reduce(
@@ -40,13 +40,15 @@ export default function createQueryClient<Q extends object = any>(
           )
         })
 
+        console.log(graphqlQuery)
+
         return new Promise(async (resolve, reject) => {
           if (!fetch) {
             resolve(null)
             return
           }
 
-          const { data, error } = await fetch?.(graphQlQuery, args, { useAxios: false })
+          const { data, error } = await fetch?.(graphqlQuery, args, { useAxios: false })
 
           if (error) {
             reject(error)

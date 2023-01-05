@@ -11,7 +11,7 @@ import type {
 /**
  * @alias GraphQL
  */
-export class NhostGraphQlClient<
+export class NhostGraphqlClient<
   GeneratedQuery extends {} = any,
   GeneratedMutation extends {} = any,
   GeneratedSubscription extends {} = any

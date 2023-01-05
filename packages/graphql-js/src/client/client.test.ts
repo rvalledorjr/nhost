@@ -1,14 +1,13 @@
 import { graphql } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, beforeAll, beforeEach, expect, test } from 'vitest'
-import { order_by, Query } from '../testUtils/nhost.generated'
-import { generatedSchema } from '../testUtils/schema.generated'
-import { NhostGraphQlClient } from './client'
+import { generatedSchema, order_by, Query } from '../testUtils/nhost.generated'
+import { NhostGraphqlClient } from './client'
 
 const mockLink = graphql.link('http://localhost:1337/v1/graphql')
 const server = setupServer()
 
-const client = new NhostGraphQlClient<Query>({
+const client = new NhostGraphqlClient<Query>({
   url: 'http://localhost:1337/v1/graphql',
   generatedSchema
 })
@@ -19,13 +18,13 @@ afterAll(() => server.close())
 
 test('client should have a default generated schema', async () => {
   server.use(
-    mockLink.query('Messages', (req, res, ctx) =>
+    mockLink.query('Authors', (req, res, ctx) =>
       res(
         ctx.data({
           data: {
             messages: [
-              { id: '1', message: 'Hello World 1' },
-              { id: '2', message: 'Hello World 2' }
+              { id: '1', name: 'Jane Doe' },
+              { id: '2', name: 'John Doe' }
             ]
           }
         })
@@ -33,13 +32,17 @@ test('client should have a default generated schema', async () => {
     )
   )
 
-  const messages = await client.query.messages({
+  const authors = await client.query.authors({
     limit: 2,
-    order_by: { message: order_by.asc }
+    order_by: { name: order_by.asc }
   })
 
-  expect(messages).toStrictEqual([
-    { id: '1', message: 'Hello World 1' },
-    { id: '2', message: 'Hello World 2' }
+  console.log(authors)
+
+  // client.query.authors({ where: {  }})
+
+  expect(authors).toStrictEqual([
+    { id: '1', name: 'Jane Doe' },
+    { id: '2', name: 'John Doe' }
   ])
 })

@@ -1,17 +1,17 @@
 import { parse, print } from 'graphql/language'
 import pascalCase from 'just-pascal-case'
 
-export interface GenerateGraphQlQueryOptions {
+export interface GenerateGraphqlQueryOptions {
   name: string
   args?: Record<string, string>
   returnFields: string[]
 }
 
-export default function generateGraphQlQuery({
+export default function generateGraphqlQuery({
   name,
   args,
   returnFields
-}: GenerateGraphQlQueryOptions) {
+}: GenerateGraphqlQueryOptions) {
   return print(
     parse(
       `query ${pascalCase(name)}${
