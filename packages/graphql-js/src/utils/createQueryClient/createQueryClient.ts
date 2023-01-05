@@ -40,8 +40,6 @@ export default function createQueryClient<Q extends object = any>(
           )
         })
 
-        console.log(graphqlQuery)
-
         return new Promise(async (resolve, reject) => {
           if (!fetch) {
             resolve(null)

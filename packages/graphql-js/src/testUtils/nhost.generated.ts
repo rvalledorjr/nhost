@@ -1,112 +1,4 @@
-// This should be auto-generated based on the results of the schema
-// introspection
-
-export type Maybe<T> = T | null
-
-export interface Scalars {
-  ID: string
-  String: string
-  Boolean: boolean
-  Int: number
-  Float: number
-  bigint: any
-  bytea: any
-  citext: any
-  date: any
-  jsonb: any
-  timestamptz: any
-  uuid: any
-}
-
-export interface general_comparison_exp<T extends keyof Scalars> {
-  _eq?: Maybe<Scalars[T]>
-  _gt?: Maybe<Scalars[T]>
-  _gte?: Maybe<Scalars[T]>
-  _in?: Maybe<Array<Scalars[T]>>
-  _is_null?: Maybe<Scalars['Boolean']>
-  _lt?: Maybe<Scalars[T]>
-  _lte?: Maybe<Scalars[T]>
-  _neq?: Maybe<Scalars[T]>
-  _nin?: Maybe<Array<Scalars[T]>>
-}
-
-export type Boolean_comparison_exp = general_comparison_exp<'Boolean'>
-export type Int_comparison_exp = general_comparison_exp<'Int'>
-export type timestamptz_comparison_exp = general_comparison_exp<'timestamptz'>
-export type uuid_comparison_exp = general_comparison_exp<'uuid'>
-export type String_comparison_exp = general_comparison_exp<'String'> & {
-  _nin?: Maybe<Array<Scalars['String']>>
-  /** does the column NOT match the given POSIX regular expression, case insensitive */
-  _niregex?: Maybe<Scalars['String']>
-  /** does the column NOT match the given pattern */
-  _nlike?: Maybe<Scalars['String']>
-  /** does the column NOT match the given POSIX regular expression, case sensitive */
-  _nregex?: Maybe<Scalars['String']>
-  /** does the column NOT match the given SQL regular expression */
-  _nsimilar?: Maybe<Scalars['String']>
-  /** does the column match the given POSIX regular expression, case sensitive */
-  _regex?: Maybe<Scalars['String']>
-  /** does the column match the given SQL regular expression */
-  _similar?: Maybe<Scalars['String']>
-}
-
-export type BooleanExpression<T> = {
-  [P in keyof T]: T[P] extends Scalars['ID']
-    ? String_comparison_exp
-    : T[P] extends Scalars['String']
-    ? String_comparison_exp
-    : T[P] extends Scalars['Int']
-    ? Int_comparison_exp
-    : T[P] extends Scalars['Float']
-    ? Int_comparison_exp
-    : T[P] extends Scalars['Boolean']
-    ? Boolean_comparison_exp
-    : T[P] extends Scalars['uuid']
-    ? uuid_comparison_exp
-    : T[P] extends Scalars['timestamptz']
-    ? timestamptz_comparison_exp
-    : String_comparison_exp
-} & {
-  _and?: Maybe<Array<BooleanExpression<T>>>
-  _not?: Maybe<BooleanExpression<T>>
-  _or?: Maybe<Array<BooleanExpression<T>>>
-}
-
-export enum order_by {
-  /** in ascending order, nulls last */
-  asc = 'asc',
-  /** in ascending order, nulls first */
-  asc_nulls_first = 'asc_nulls_first',
-  /** in ascending order, nulls last */
-  asc_nulls_last = 'asc_nulls_last',
-  /** in descending order, nulls first */
-  desc = 'desc',
-  /** in descending order, nulls first */
-  desc_nulls_first = 'desc_nulls_first',
-  /** in descending order, nulls last */
-  desc_nulls_last = 'desc_nulls_last'
-}
-
-export type OrderByExpression<T> = { [P in keyof T]?: order_by }
-
-export interface ListQueryArgs<T> {
-  distinct_on?: Maybe<Array<keyof T>>
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  order_by?: Maybe<OrderByExpression<T> | Array<OrderByExpression<T>>>
-  where?: Maybe<BooleanExpression<Partial<T>>>
-}
-
-// These types will be generated based on the schema
-
-export interface Author {
-  id: Scalars['uuid']
-  name: Scalars['String']
-}
-
-export interface Query {
-  authors: (args?: ListQueryArgs<Author>) => Promise<Partial<Author>[]>
-}
+// This object will be generated based on the introspection results
 
 export const generatedSchema = {
   Boolean_comparison_exp: {
@@ -301,3 +193,119 @@ export const generatedSchema = {
     _nin: { __type: '[uuid!]' }
   }
 } as const
+
+// These types should be used as utilities, maybe some of them will be generated
+// based on the introspection results
+export type Maybe<T> = T | null
+
+export type Enumerable<T> = T | Array<T>
+
+export interface Scalars {
+  ID: string
+  String: string
+  Boolean: boolean
+  Int: number
+  Float: number
+  bigint: any
+  bytea: any
+  citext: any
+  date: any
+  jsonb: any
+  timestamptz: any
+  uuid: any
+}
+
+export interface general_comparison_exp<T> {
+  _eq?: Maybe<T>
+  _gt?: Maybe<T>
+  _gte?: Maybe<T>
+  _in?: Maybe<Array<T>>
+  _is_null?: Maybe<Scalars['Boolean']>
+  _lt?: Maybe<T>
+  _lte?: Maybe<T>
+  _neq?: Maybe<T>
+  _nin?: Maybe<Array<T>>
+}
+
+export type String_comparison_exp = general_comparison_exp<Scalars['String']> & {
+  _nin?: Maybe<Array<Scalars['String']>>
+  /** does the column NOT match the given POSIX regular expression, case insensitive */
+  _niregex?: Maybe<Scalars['String']>
+  /** does the column NOT match the given pattern */
+  _nlike?: Maybe<Scalars['String']>
+  /** does the column NOT match the given POSIX regular expression, case sensitive */
+  _nregex?: Maybe<Scalars['String']>
+  /** does the column NOT match the given SQL regular expression */
+  _nsimilar?: Maybe<Scalars['String']>
+  /** does the column match the given POSIX regular expression, case sensitive */
+  _regex?: Maybe<Scalars['String']>
+  /** does the column match the given SQL regular expression */
+  _similar?: Maybe<Scalars['String']>
+}
+
+export type BooleanExpression<T> = {
+  _and?: Maybe<Array<BooleanExpression<T>>>
+  _not?: Maybe<BooleanExpression<T>>
+  _or?: Maybe<Array<BooleanExpression<T>>>
+} & {
+  [P in keyof T]?: T[P] extends object ? BooleanExpression<T[P]> : general_comparison_exp<T[P]>
+}
+
+export type OrderBy =
+  | 'asc'
+  | 'asc_nulls_first'
+  | 'asc_nulls_last'
+  | 'desc'
+  | 'desc_nulls_first'
+  | 'desc_nulls_last'
+
+export type OrderByExpression<T> = { [P in keyof T]?: OrderBy }
+
+export interface ListQueryArgs<T> {
+  distinct_on?: Maybe<keyof T | Array<keyof T>>
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  order_by?: Maybe<OrderByExpression<T> | Array<OrderByExpression<T>>>
+}
+
+// These types will be generated based on the schema
+
+export interface Post {
+  id: Scalars['uuid']
+  title: Scalars['String']
+  author: Author
+}
+
+export interface PostWhereQueryInput {
+  _and?: Enumerable<PostWhereQueryInput>
+  _or?: Enumerable<PostWhereQueryInput>
+  _not?: PostWhereQueryInput
+  id?: general_comparison_exp<Scalars['uuid']>
+  title?: String_comparison_exp
+  author?: AuthorWhereQueryInput
+}
+
+export interface Author {
+  id: Scalars['uuid']
+  name: Scalars['String']
+  age: Scalars['Int']
+  posts: Post[]
+}
+
+export interface AuthorWhereQueryInput {
+  _and?: Enumerable<AuthorWhereQueryInput>
+  _or?: Enumerable<AuthorWhereQueryInput>
+  _not?: AuthorWhereQueryInput
+  id?: general_comparison_exp<Scalars['uuid']>
+  name?: String_comparison_exp
+  age?: general_comparison_exp<Scalars['Int']>
+  posts?: PostWhereQueryInput
+}
+
+export interface AuthorListQueryArgs extends ListQueryArgs<Author> {
+  where?: AuthorWhereQueryInput
+}
+
+export interface Query {
+  authors: (args?: AuthorListQueryArgs) => Promise<Partial<Author>[]>
+}
