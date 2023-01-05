@@ -31,13 +31,15 @@ export default function createQueryClient<Q extends object = any>(
         const graphqlQuery = generateGraphqlQuery({
           name: queryName,
           returnFields: scalarFields,
-          args: Object.keys(args || {}).reduce(
-            (currentArguments, key) => ({
-              ...currentArguments,
-              [key]: generatedQueries[queryName].__args?.[key]
-            }),
-            {}
-          )
+          args: args
+            ? Object.keys(args).reduce(
+                (currentArguments, key) => ({
+                  ...currentArguments,
+                  [key]: generatedQueries[queryName].__args?.[key]
+                }),
+                {}
+              )
+            : null
         })
 
         return new Promise(async (resolve, reject) => {
@@ -52,7 +54,7 @@ export default function createQueryClient<Q extends object = any>(
             reject(error)
           }
 
-          resolve(data?.data?.[queryName])
+          resolve(data?.[queryName])
         })
       }
     }),

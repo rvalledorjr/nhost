@@ -3,14 +3,14 @@ import pascalCase from 'just-pascal-case'
 
 export interface GenerateGraphqlQueryOptions {
   name: string
-  args?: Record<string, string>
   returnFields: string[]
+  args?: Record<string, string> | null
 }
 
 export default function generateGraphqlQuery({
   name,
-  args,
-  returnFields
+  returnFields,
+  args
 }: GenerateGraphqlQueryOptions) {
   return print(
     parse(

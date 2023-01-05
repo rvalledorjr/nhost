@@ -1,19 +1,10 @@
 import { expect, test } from 'vitest'
-import { generatedSchema } from '../../testUtils/schema.generated'
+import { generatedSchema } from '../../testUtils/nhost.generated'
 import prepareQueryFields from './prepareQueryFields'
 
 test('return values should be prepared', () => {
-  expect(prepareQueryFields(generatedSchema, 'messages')).toMatchObject({
-    nonScalar: ['projects'],
-    scalar: [
-      '__typename',
-      'expiration_date',
-      'from_email',
-      'id',
-      'message',
-      'phone_number',
-      'project_id',
-      'subject'
-    ]
+  expect(prepareQueryFields(generatedSchema, 'authors')).toMatchObject({
+    nonScalar: ['posts', 'posts_aggregate'],
+    scalar: ['__typename', 'age', 'id', 'name']
   })
 })
