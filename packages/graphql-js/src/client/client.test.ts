@@ -1,73 +1,45 @@
-import { expect, test } from 'vitest'
-import { generatedSchema, Mutation, Query, Subscription } from '../testUtils/schema.generated'
-import { NhostGraphQlClient, prepareFields } from './client'
+import { graphql } from 'msw'
+import { setupServer } from 'msw/node'
+import { afterAll, beforeAll, beforeEach, expect, test } from 'vitest'
+import { order_by, Query } from '../testUtils/nhost.generated'
+import { generatedSchema } from '../testUtils/schema.generated'
+import { NhostGraphQlClient } from './client'
 
-test('client should have a default generated schema', () => {
-  const client = new NhostGraphQlClient<Query, Mutation, Subscription>({
-    url: 'http://localhost:1337/v1/graphql',
-    generatedSchema
-  })
+const mockLink = graphql.link('http://localhost:1337/v1/graphql')
+const server = setupServer()
 
-  expect(
-    client.query
-      ?.messages({
-        where: {
-          id: { _eq: '4ea37249-2b87-45c4-a501-74596fd6c8ba' }
-        }
-      })
-      // @ts-ignore
-      .returnAll()
-  ).toMatchInlineSnapshot(`
-    "query Messages($where: messages_bool_exp) {
-      messages(where: $where) {
-        __typename
-        expiration_date
-        from_email
-        id
-        message
-        phone_number
-        project_id
-        subject
-      }
-    }"
-  `)
-
-  expect(
-    client.query
-      ?.messages({
-        where: {
-          id: { _eq: '4ea37249-2b87-45c4-a501-74596fd6c8ba' }
-        }
-      })
-      // @ts-ignore
-      .projects({ where: { id: {} } })
-      .returnAll()
-  ).toMatchInlineSnapshot(`
-    "query Projects($where: projects_bool_exp) {
-      projects(where: $where) {
-        __typename
-        api_key
-        id
-        name
-        to_emails
-        to_emails_2
-      }
-    }"
-  `)
+const client = new NhostGraphQlClient<Query>({
+  url: 'http://localhost:1337/v1/graphql',
+  generatedSchema
 })
 
-test('return values should be prepared', () => {
-  expect(prepareFields(generatedSchema, 'messages')).toMatchObject({
-    nonScalar: ['projects'],
-    scalar: [
-      '__typename',
-      'expiration_date',
-      'from_email',
-      'id',
-      'message',
-      'phone_number',
-      'project_id',
-      'subject'
-    ]
+beforeAll(() => server.listen())
+beforeEach(() => server.resetHandlers())
+afterAll(() => server.close())
+
+test('client should have a default generated schema', async () => {
+  server.use(
+    mockLink.query('Messages', (req, res, ctx) =>
+      res(
+        ctx.data({
+          data: {
+            messages: [
+              { id: '1', message: 'Hello World 1' },
+              { id: '2', message: 'Hello World 2' }
+            ]
+          }
+        })
+      )
+    )
+  )
+
+  const messages = await client.query.messages({
+    limit: 2,
+    order_by: { message: order_by.asc }
   })
+
+  expect(messages).toStrictEqual([
+    { id: '1', message: 'Hello World 1' },
+    { id: '2', message: 'Hello World 2' }
+  ])
 })
