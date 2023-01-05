@@ -3455,13 +3455,17 @@ export interface PostSelect {
   author?: boolean | AuthorArgs
 }
 
-export interface AuthorArgs extends ListQueryArgs<Author> {
-  where?: AuthorWhereQueryInput
+export interface AuthorArgs {
+  variables?: ListQueryArgs<Author> & {
+    where?: AuthorWhereQueryInput
+  }
   select?: AuthorSelect
 }
 
-export interface PostArgs extends ListQueryArgs<Post> {
-  where?: PostWhereQueryInput
+export interface PostArgs {
+  variables: ListQueryArgs<Post> & {
+    where?: PostWhereQueryInput
+  }
   select?: PostSelect
 }
 

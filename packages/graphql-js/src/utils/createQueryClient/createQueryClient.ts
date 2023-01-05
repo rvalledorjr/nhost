@@ -31,16 +31,14 @@ export default function createQueryClient<Q extends object = any>(
         const graphqlQuery = generateGraphqlQuery({
           name: queryName,
           returnFields: scalarFields,
-          args: args
-            ? Object.keys(args)
-                .filter((arg) => arg !== 'select')
-                .reduce(
-                  (currentArguments, key) => ({
-                    ...currentArguments,
-                    [key]: generatedQueries[queryName].__args?.[key]
-                  }),
-                  {}
-                )
+          args: args?.variables
+            ? Object.keys(args.variables).reduce(
+                (currentArguments, key) => ({
+                  ...currentArguments,
+                  [key]: generatedQueries[queryName].__args?.[key]
+                }),
+                {}
+              )
             : null
         })
 
@@ -50,7 +48,7 @@ export default function createQueryClient<Q extends object = any>(
             return
           }
 
-          const { data, error } = await fetch?.(graphqlQuery, args, { useAxios: false })
+          const { data, error } = await fetch?.(graphqlQuery, args?.variables, { useAxios: false })
 
           if (error) {
             reject(error)

@@ -66,9 +66,11 @@ test('should return authors that are older than 25', async () => {
   )
 
   const authors = await client.query.authors({
-    where: {
-      age: {
-        _gt: 25
+    variables: {
+      where: {
+        age: {
+          _gt: 25
+        }
       }
     }
   })
