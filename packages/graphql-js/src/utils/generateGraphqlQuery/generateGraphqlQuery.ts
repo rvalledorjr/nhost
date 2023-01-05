@@ -12,20 +12,22 @@ export default function generateGraphqlQuery({
   returnFields,
   args
 }: GenerateGraphqlQueryOptions) {
+  const queryParameters = args
+    ? Object.keys(args)
+        .map((key) => `$${key}: ${args?.[key]}`)
+        .join(', ')
+    : ''
+
+  const fieldParameters = args
+    ? Object.keys(args)
+        .map((key) => `${key}: $${key}`)
+        .join(', ')
+    : ''
+
   return print(
     parse(
-      `query ${pascalCase(name)}${
-        args
-          ? `(${Object.keys(args)
-              .map((key) => `$${key}: ${args[key]}`)
-              .join(', ')})`
-          : ''
-      } { ${name}${
-        args
-          ? `(${Object.keys(args)
-              .map((key) => `${key}: $${key}`)
-              .join(', ')})`
-          : ''
+      `query ${pascalCase(name)}${queryParameters ? `(${queryParameters})` : ''} { ${name}${
+        fieldParameters ? `(${fieldParameters})` : ''
       } { ${returnFields.join(' ')} }}`
     )
   )

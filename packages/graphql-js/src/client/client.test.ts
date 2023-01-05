@@ -10,8 +10,8 @@ const server = setupServer()
 
 const client = new NhostGraphqlClient<Query>({
   url: 'http://localhost:1337/v1/graphql',
-  generatedSchema,
-  adminSecret: 'nhost-admin-secret'
+  adminSecret: 'nhost-admin-secret',
+  generatedSchema
 })
 
 beforeAll(() => server.listen())

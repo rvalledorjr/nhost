@@ -32,13 +32,15 @@ export default function createQueryClient<Q extends object = any>(
           name: queryName,
           returnFields: scalarFields,
           args: args
-            ? Object.keys(args).reduce(
-                (currentArguments, key) => ({
-                  ...currentArguments,
-                  [key]: generatedQueries[queryName].__args?.[key]
-                }),
-                {}
-              )
+            ? Object.keys(args)
+                .filter((arg) => arg !== 'select')
+                .reduce(
+                  (currentArguments, key) => ({
+                    ...currentArguments,
+                    [key]: generatedQueries[queryName].__args?.[key]
+                  }),
+                  {}
+                )
             : null
         })
 

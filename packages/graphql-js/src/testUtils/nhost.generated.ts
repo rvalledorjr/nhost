@@ -3398,27 +3398,20 @@ export interface ListQueryArgs<T> {
 
 // These types will be generated based on the schema
 
-export interface Post {
-  id: Scalars['uuid']
-  title: Scalars['String']
-  author: Author
-}
-
-export interface PostWhereQueryInput {
-  _and?: Enumerable<PostWhereQueryInput>
-  _or?: Enumerable<PostWhereQueryInput>
-  _not?: PostWhereQueryInput
-  id?: general_comparison_exp<Scalars['uuid']>
-  title?: String_comparison_exp
-  author?: AuthorWhereQueryInput
-}
+// Default models
 
 export interface Author {
   id: Scalars['uuid']
   name: Scalars['String']
   age: Scalars['Int']
-  posts: Post[]
 }
+
+export interface Post {
+  id: Scalars['uuid']
+  title: Scalars['String']
+}
+
+// Where inputs
 
 export interface AuthorWhereQueryInput {
   _and?: Enumerable<AuthorWhereQueryInput>
@@ -3430,14 +3423,41 @@ export interface AuthorWhereQueryInput {
   posts?: PostWhereQueryInput
 }
 
-export interface AuthorListQueryArgs extends ListQueryArgs<Author> {
-  where?: AuthorWhereQueryInput
+export interface PostWhereQueryInput {
+  _and?: Enumerable<PostWhereQueryInput>
+  _or?: Enumerable<PostWhereQueryInput>
+  _not?: PostWhereQueryInput
+  id?: general_comparison_exp<Scalars['uuid']>
+  title?: String_comparison_exp
+  author?: AuthorWhereQueryInput
 }
-export interface PostListQueryArgs extends ListQueryArgs<Post> {
+
+// Select inputs
+
+export interface AuthorSelect {
+  id?: boolean
+  name?: boolean
+  age?: boolean
+  posts?: boolean | PostArgs
+}
+
+export interface PostSelect {
+  id?: boolean
+  title?: boolean
+  author?: boolean | AuthorArgs
+}
+
+export interface AuthorArgs extends ListQueryArgs<Author> {
+  where?: AuthorWhereQueryInput
+  select?: AuthorSelect
+}
+
+export interface PostArgs extends ListQueryArgs<Post> {
   where?: PostWhereQueryInput
+  select?: PostSelect
 }
 
 export interface Query {
-  authors: (args?: AuthorListQueryArgs) => Promise<Partial<Author>[]>
-  posts: (args?: PostListQueryArgs) => Promise<Partial<Post>[]>
+  authors: (args?: AuthorArgs) => Promise<Partial<Author>[]>
+  posts: (args?: PostArgs) => Promise<Partial<Post>[]>
 }
