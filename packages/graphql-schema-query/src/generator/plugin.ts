@@ -1,6 +1,6 @@
 import type { CodegenPlugin } from '@graphql-codegen/plugin-helpers'
 
-function transformUnderScored(str: string) {
+const transformUnderScored = (str: string) => {
   let result = str[0].toUpperCase()
 
   for (let i = 1; i < str.length; i++) {
@@ -14,6 +14,7 @@ function transformUnderScored(str: string) {
   }
   return result
 }
+
 const typeName = (type: any): string => {
   if ('ofType' in type) {
     return typeName(type.ofType)
@@ -24,13 +25,18 @@ const typeName = (type: any): string => {
 const plugin: CodegenPlugin = {
   plugin(schema) {
     let result = ''
-    const queryConfig = schema.getType('query_root')?.toConfig()
-    if (queryConfig && 'fields' in queryConfig) {
-      const mapping = Object.entries(queryConfig.fields)
-        .map(([name, field]) => `  ${name}: ${typeName(field.type)}`)
-        .join(',\n')
-      result += `export const Queries: Record<string, { name: string }> = {\n${mapping}\n}`
+
+    for (const operation of ['Query', 'Mutation']) {
+      const factoryName = `${operation}Factory`
+      const config = schema.getType(`${operation.toLowerCase()}_root`)?.toConfig()
+      if (config && 'fields' in config) {
+        const mapping = Object.entries(config.fields)
+          .map(([name, field]) => `  ${name}: ${typeName(field.type)}`)
+          .join(',\n')
+        result += `export const ${factoryName}: Record<string, { name: string }> = {\n${mapping}\n}\n\n`
+      }
     }
+
     return result
   }
 }

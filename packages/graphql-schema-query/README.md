@@ -33,3 +33,9 @@ res.map(({ createdAt, contents, user: { displayName } }) => {
   console.log(`${displayName} created the following todo at ${createdAt}: ${contents}`)
 })
 ```
+
+### to try
+
+- required fields e.g. userId when inserting a todo
+- subscriptions
+- other todos in the code

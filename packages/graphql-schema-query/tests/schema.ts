@@ -1132,7 +1132,7 @@ export class Uuid_Comparison_Exp {
   _nin?: InputMaybe<Array<Scalars['uuid']>>;
 };
 
-export const Queries: Record<string, { name: string }> = {
+export const QueryFactory: Record<string, { name: string }> = {
   authUserSecurityKey: AuthUserSecurityKeys,
   authUserSecurityKeys: AuthUserSecurityKeys,
   file: Files,
@@ -1143,3 +1143,23 @@ export const Queries: Record<string, { name: string }> = {
   user: Users,
   users: Users
 }
+
+export const MutationFactory: Record<string, { name: string }> = {
+  deleteAuthUserSecurityKey: AuthUserSecurityKeys,
+  deleteAuthUserSecurityKeys: AuthUserSecurityKeys_Mutation_Response,
+  deleteFile: Files,
+  deleteFiles: Files_Mutation_Response,
+  deleteTodo: Todos,
+  deleteTodos: Todos_Mutation_Response,
+  insertFile: Files,
+  insertFiles: Files_Mutation_Response,
+  insertTodo: Todos,
+  insertTodos: Todos_Mutation_Response,
+  updateFile: Files,
+  updateFiles: Files_Mutation_Response,
+  updateTodo: Todos,
+  updateTodos: Todos_Mutation_Response,
+  update_files_many: Files_Mutation_Response,
+  update_todos_many: Todos_Mutation_Response
+}
+
