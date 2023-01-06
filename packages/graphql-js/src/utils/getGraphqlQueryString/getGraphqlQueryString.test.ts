@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import getGraphqlQueryString from './getGraphqlQueryString'
 
 test('should generate a GraphQL query without arguments', () => {
-  expect(getGraphqlQueryString({ name: 'messages', returnableFields: 'id message' }))
+  expect(getGraphqlQueryString({ name: 'messages', returnableFields: 'messages { id message }' }))
     .toMatchInlineSnapshot(`
     "query Messages {
       messages {
@@ -17,9 +17,8 @@ test('should generate a GraphQL query with arguments', () => {
   expect(
     getGraphqlQueryString({
       name: 'messages',
-      variables: { where: 'messages_bool_exp' },
       queryParams: [{ name: 'where', path: 'messages', type: 'messages_bool_exp' }],
-      returnableFields: 'id message'
+      returnableFields: 'messages(where: $where) { id message }'
     })
   ).toBe(`query Messages($where: messages_bool_exp) {
   messages(where: $where) {
@@ -33,12 +32,12 @@ test('should generate proper argument list for query if there are nested argumen
   expect(
     getGraphqlQueryString({
       name: 'authors',
-      variables: { where: 'authors_bool_exp' },
       queryParams: [
         { name: 'where', path: 'authors', type: 'authors_bool_exp' },
         { name: 'where', path: 'authors.messages', type: 'messages_bool_exp' }
       ],
-      returnableFields: 'id name messages(where: $authorsMessagesWhere) { id message }'
+      returnableFields:
+        'authors(where: $authorsWhere) { id name messages(where: $authorsMessagesWhere) { id message } }'
     })
   ).toBe(`query Authors($authorsWhere: authors_bool_exp, $authorsMessagesWhere: messages_bool_exp) {
   authors(where: $authorsWhere) {

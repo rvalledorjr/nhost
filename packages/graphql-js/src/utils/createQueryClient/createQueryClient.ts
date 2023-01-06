@@ -8,6 +8,7 @@ import type {
 import getGraphqlQueryString from '../getGraphqlQueryString'
 import getQueryParams from '../getQueryParams'
 import getReturnableFields from '../getReturnableFields'
+import normalizeType from '../normalizeType'
 
 export type FetchFunction = <T = any, V = any>(
   document: string | DocumentNode,
@@ -46,17 +47,11 @@ export default function createQueryClient<Q extends object = any>(
           returnableFields: getReturnableFields({
             generatedSchema,
             args,
-            field: { name: queryName, type: queryName }
-          }),
-          variables: args?.variables
-            ? Object.keys(args.variables).reduce(
-                (currentArguments, key) => ({
-                  ...currentArguments,
-                  [key]: generatedQueries[queryName].__args?.[key]
-                }),
-                {}
-              )
-            : null
+            field: {
+              name: queryName,
+              type: normalizeType(generatedQueries[queryName]?.__type)
+            }
+          })
         })
 
         return new Promise(async (resolve, reject) => {

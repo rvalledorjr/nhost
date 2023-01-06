@@ -16,10 +16,6 @@ export interface GetGraphqlQueryStringOptions {
    * The query parameters.
    */
   queryParams?: QueryParam[]
-  /**
-   * The variables to use in the query.
-   */
-  variables?: Record<string, string> | null
 }
 
 /**
@@ -31,14 +27,10 @@ export interface GetGraphqlQueryStringOptions {
 export default function getGraphqlQueryString({
   name,
   returnableFields,
-  queryParams,
-  variables
+  queryParams
 }: GetGraphqlQueryStringOptions) {
   const mappedQueryParams = queryParams?.filter(({ type }) => Boolean(type))
   const allParamPaths = new Set(mappedQueryParams?.map(({ path }) => path) || [])
-  const fieldParameters = Object.keys(variables || {}).filter((key) =>
-    mappedQueryParams?.some(({ name }) => name === key)
-  )
 
   return print(
     parse(
@@ -57,19 +49,7 @@ export default function getGraphqlQueryString({
               })
               .join(', ')})`
           : ''
-      } { ${name}${
-        fieldParameters.length
-          ? `(${fieldParameters
-              .map((key) => {
-                if (allParamPaths.size === 1) {
-                  return `${key}: $${key}`
-                }
-
-                return `${key}: $${name}${capitalize(key)}`
-              })
-              .join(', ')})`
-          : ''
-      } { ${returnableFields} }}`
+      } { ${returnableFields} }`
     )
   )
 }

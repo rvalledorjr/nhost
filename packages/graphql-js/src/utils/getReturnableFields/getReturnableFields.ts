@@ -6,6 +6,7 @@ import type {
 } from '../../client/client.types'
 import capitalize from '../capitalize'
 import getQueryParams from '../getQueryParams'
+import normalizeType from '../normalizeType'
 
 export interface GetReturnableFieldsOptions<S extends BaseGeneratedSchema = any> {
   /**
@@ -50,6 +51,7 @@ export default function getReturnableFields<S extends BaseGeneratedSchema = any>
   previousQueryParams
 }: GetReturnableFieldsOptions<S>): string {
   const generatedFields = generatedSchema[field.type]
+
   const queryParams =
     previousQueryParams || getQueryParams({ generatedSchema, args, fieldName: field.name })
 
@@ -63,7 +65,7 @@ export default function getReturnableFields<S extends BaseGeneratedSchema = any>
 
   const { scalar, nonScalar } = Object.keys(generatedFields || {}).reduce(
     ({ scalar, nonScalar }, field) => {
-      const fieldType = generatedFields[field]?.__type.replace(/!|\[|\]/g, '')
+      const fieldType = normalizeType(generatedFields[field]?.__type)
 
       if (typeof generatedSchema[fieldType] === 'undefined') {
         return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
