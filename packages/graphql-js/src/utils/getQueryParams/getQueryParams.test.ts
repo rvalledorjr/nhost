@@ -6,7 +6,7 @@ test('should generate proper query parameters', () => {
   expect(
     getQueryParams({
       generatedSchema,
-      fieldName: 'authors',
+      field: { name: 'authors', type: 'authors_bool_exp' },
       args: {
         variables: {
           where: {

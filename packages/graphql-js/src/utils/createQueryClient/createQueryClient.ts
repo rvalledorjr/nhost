@@ -3,7 +3,8 @@ import type {
   BaseGeneratedSchema,
   NhostGraphqlRequestConfig,
   NhostGraphqlRequestResponse,
-  QueryArgs
+  QueryArgs,
+  QueryField
 } from '../../client/client.types'
 import getGraphqlQueryString from '../getGraphqlQueryString'
 import getQueryParams from '../getQueryParams'
@@ -37,20 +38,22 @@ export default function createQueryClient<Q extends object = any>(
     (queryClient, queryName) => ({
       ...queryClient,
       [queryName]: (args?: QueryArgs) => {
+        const field: QueryField = {
+          name: queryName,
+          type: normalizeType(generatedQueries[queryName]?.__type)
+        }
+
         const graphqlQuery = getGraphqlQueryString({
           name: queryName,
           queryParams: getQueryParams({
             generatedSchema,
             args,
-            fieldName: queryName
+            field
           }),
           returnableFields: getReturnableFields({
             generatedSchema,
             args,
-            field: {
-              name: queryName,
-              type: normalizeType(generatedQueries[queryName]?.__type)
-            }
+            field
           })
         })
 
