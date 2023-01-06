@@ -4,22 +4,22 @@ import pascalCase from 'just-pascal-case'
 export interface GenerateGraphqlQueryOptions {
   name: string
   returnFields: string[]
-  args?: Record<string, string> | null
+  variables?: Record<string, string> | null
 }
 
 export default function generateGraphqlQuery({
   name,
   returnFields,
-  args
+  variables
 }: GenerateGraphqlQueryOptions) {
-  const queryParameters = args
-    ? Object.keys(args)
-        .map((key) => `$${key}: ${args?.[key]}`)
+  const queryParameters = variables
+    ? Object.keys(variables)
+        .map((key) => `$${key}: ${variables?.[key]}`)
         .join(', ')
     : ''
 
-  const fieldParameters = args
-    ? Object.keys(args)
+  const fieldParameters = variables
+    ? Object.keys(variables)
         .map((key) => `${key}: $${key}`)
         .join(', ')
     : ''

@@ -17,7 +17,7 @@ test('should generate a GraphQL query with arguments', () => {
   expect(
     generateGraphqlQuery({
       name: 'messages',
-      args: { where: 'messages_bool_exp' },
+      variables: { where: 'messages_bool_exp' },
       returnFields: ['id', 'message']
     })
   ).toMatchInlineSnapshot(`

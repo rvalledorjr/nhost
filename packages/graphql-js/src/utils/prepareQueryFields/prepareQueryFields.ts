@@ -4,78 +4,105 @@ export interface SelectedFields
   extends Record<string, boolean | Record<string, any> | SelectedFields> {}
 
 export interface QueryArgs {
-  variables?: Record<string, string>
+  variables?: Record<string, any>
   select?: SelectedFields
+}
+
+export interface QueryField {
+  name: string
+  type: string
 }
 
 function capitalize(text: string) {
   return `${text.charAt(0).toUpperCase()}${text.slice(1)}`
 }
 
-export function getVariableNames(config: QueryArgs): string[] {
-  const nestedVariables = Object.keys(config.select || {})
-    .filter((key) => typeof config.select?.[key] !== 'boolean')
-    .map((key) => {
-      console.log(key)
-      return getVariableNames(config.select?.[key] as QueryArgs)
-    })
+export function getVariableNames(
+  queryArgs: QueryArgs,
+  fieldName: string
+): { field: string; variable: string }[] {
+  const currentVariables = Object.keys(queryArgs.variables || {}).map((variable) => ({
+    field: fieldName,
+    variable
+  }))
+
+  const nestedVariables = Object.keys(queryArgs.select || {})
+    .filter((key) => typeof queryArgs.select?.[key] !== 'boolean')
+    .map((key) =>
+      getVariableNames(queryArgs.select?.[key] as QueryArgs, key).map((variable) => ({
+        field: `${fieldName}.${variable.field}`,
+        variable: variable.variable
+      }))
+    )
     .reduce((variables, currentVariables) => [...variables, ...currentVariables], [])
 
-  console.log(config.variables)
-
-  return [...Object.keys(config?.variables || {}), ...nestedVariables]
+  return [...currentVariables, ...nestedVariables]
 }
 
-export function prepareFields<S extends BaseGeneratedSchema = any>(
+export function prepareReturnFields<S extends BaseGeneratedSchema = any>(
   generatedSchema: S,
-  selectedFields: SelectedFields
+  field: QueryField,
+  config: QueryArgs,
+  previousField?: string
 ): string {
-  const { query: generatedQueries } = generatedSchema
-  const keys = Object.keys(selectedFields)
+  const variables = getVariableNames(config, field.name)
+  const currentVariables = variables?.filter(({ field: variableField }) =>
+    previousField
+      ? variableField === `${previousField}.${field.name}`
+      : variableField === field.name
+  )
+  const fields = generatedSchema[field.type]
 
-  return keys.reduce((queryFields, key) => {
-    const value = selectedFields[key]
-
-    if (!value) {
-      return queryFields
-    }
-
-    if (typeof value === 'boolean') {
-      const isScalar = typeof generatedSchema[key] === 'undefined'
-
-      if (isScalar) {
-        return `${queryFields} ${key}`
+  const { scalar, nonScalar } = Object.keys(fields || {}).reduce(
+    ({ scalar, nonScalar }, field) => {
+      if (!config.select?.[field]) {
+        return { nonScalar, scalar }
       }
 
-      const { scalar } = prepareQueryFields(generatedSchema, key as keyof S)
+      const fieldType = fields[field]?.__type.replace(/!|\[|\]/g, '')
 
-      return `${queryFields} ${key} { ${scalar.join(' ')} }`
+      if (typeof generatedSchema[fieldType] === 'undefined') {
+        return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
+      }
+
+      return { scalar, nonScalar: [...nonScalar, { name: field, type: fieldType }] }
+    },
+    {
+      scalar: [] as { name: string; type: string }[],
+      nonScalar: [] as { name: string; type: string }[]
     }
+  )
 
-    if (!value.select) {
-      return queryFields
-    }
-
-    if (!value.variables || Object.keys(value.variables).length === 0) {
-      return `${queryFields} ${key} { ${prepareFields(generatedSchema, value.select)} }`
-    }
-
-    // we get all the variables of the current
-    const variables = Object.keys(value.variables).reduce(
-      (currentArguments, variable) => ({
-        ...currentArguments,
-        [`${key}${capitalize(variable)}`]: {
-          type: generatedQueries[key].__args?.[variable] || '',
-          originalName: variable
-        }
-      }),
-      {} as Record<string, { type: string; originalName: string }>
+  const returnFields = [
+    ...scalar.map(({ name }) => name),
+    ...nonScalar.map(({ name, type }) =>
+      prepareReturnFields(generatedSchema, { name, type }, config.select?.[name] as QueryArgs, name)
     )
+  ]
 
-    return `${queryFields} ${key}${`(${Object.keys(variables)
-      .map((variable) => `${variables[variable].originalName}: $${variable}`)
-      .join(', ')})`} { ${prepareFields(generatedSchema, value.select).trim()} }`
-  }, '')
+  console.log(currentVariables, variables)
+
+  if (currentVariables.length === variables.length) {
+    return `${field.name}${
+      currentVariables.length > 0
+        ? `(${currentVariables.map(({ variable }) => `${variable}: $${variable}`).join(', ')})`
+        : ''
+    } { ${returnFields.join(' ')} }`
+  }
+
+  return `${field.name}${
+    currentVariables.length > 0
+      ? `(${currentVariables
+          .map(
+            ({ field, variable }) =>
+              `${variable}: $${field
+                .split('.')
+                .map((subField, index) => (index > 0 ? capitalize(subField) : subField))
+                .join()}${capitalize(variable)}`
+          )
+          .join(', ')})`
+      : ''
+  } { ${returnFields.join(' ')} }`
 }
 
 export default function prepareQueryFields<S extends BaseGeneratedSchema = any>(
