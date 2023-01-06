@@ -6,7 +6,15 @@ import { generatedSchema, type Query } from '../testUtils/nhost.generated'
 import { NhostGraphqlClient } from './client'
 
 const mockLink = graphql.link('http://localhost:1337/v1/graphql')
-const server = setupServer()
+const server = setupServer(
+  mockLink.query('Authors', (_req, res, ctx) =>
+    res(
+      ctx.data({
+        authors: mockAuthors
+      })
+    )
+  )
+)
 
 const client = new NhostGraphqlClient<Query>({
   url: 'http://localhost:1337/v1/graphql',
@@ -19,16 +27,6 @@ beforeEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
 test('should return all authors', async () => {
-  server.use(
-    mockLink.query('Authors', (_req, res, ctx) =>
-      res(
-        ctx.data({
-          authors: mockAuthors
-        })
-      )
-    )
-  )
-
   const authors = await client.query.authors()
 
   expect(authors).toStrictEqual([
@@ -89,4 +87,35 @@ test('should return authors that are older than 25', async () => {
       name: 'Don Doe'
     }
   ])
+})
+
+test('should return only the fields that are selected', async () => {
+  const authors = await client.query.authors({
+    variables: {
+      where: {
+        age: {
+          _gt: 25
+        }
+      }
+    },
+    select: {
+      name: true,
+      posts: {
+        variables: {
+          where: {
+            title: {
+              _eq: 'Post 1'
+            }
+          }
+        },
+        select: {
+          id: true
+        }
+      }
+    }
+  })
+
+  expect(authors).toHaveLength(3)
+  expect(Object.keys(authors.at(0) || {})).toHaveLength(1)
+  expect(authors.at(0)).toHaveProperty('name')
 })

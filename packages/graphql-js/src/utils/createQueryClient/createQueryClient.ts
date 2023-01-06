@@ -5,7 +5,7 @@ import {
   NhostGraphqlRequestResponse
 } from '../../client/client.types'
 import generateGraphqlQuery from '../generateGraphqlQuery'
-import prepareQueryFields from '../prepareQueryFields'
+import prepareQueryFields, { getVariableNames, QueryArgs } from '../prepareQueryFields'
 
 export type FetchFunction = <T = any, V = any>(
   document: string | DocumentNode,
@@ -26,8 +26,15 @@ export default function createQueryClient<Q extends object = any>(
   return Object.keys(generatedQueries).reduce(
     (queryClient, queryName) => ({
       ...queryClient,
-      [queryName]: (args?: typeof generatedQueries[typeof queryName]['__args']) => {
+      [queryName]: (args?: QueryArgs) => {
         const { scalar: scalarFields } = prepareQueryFields(generatedSchema, queryName)
+
+        // console.log(prepareFields(generatedSchema, args?.select || {}))
+
+        if (args) {
+          console.log(getVariableNames(args))
+        }
+
         const graphqlQuery = generateGraphqlQuery({
           name: queryName,
           returnFields: scalarFields,

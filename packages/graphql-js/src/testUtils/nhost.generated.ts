@@ -3409,12 +3409,14 @@ export interface ListQueryArgs<T> {
 // Default models
 
 export interface Author {
+  __typename: Scalars['String']
   id: Scalars['uuid']
   name: Scalars['String']
   age: Scalars['Int']
 }
 
 export interface Post {
+  __typename: Scalars['String']
   id: Scalars['uuid']
   title: Scalars['String']
 }
@@ -3443,6 +3445,7 @@ export interface PostWhereQueryInput {
 // Select inputs
 
 export interface AuthorSelect {
+  __typename?: boolean
   id?: boolean
   name?: boolean
   age?: boolean
@@ -3450,6 +3453,7 @@ export interface AuthorSelect {
 }
 
 export interface PostSelect {
+  __typename?: boolean
   id?: boolean
   title?: boolean
   author?: boolean | AuthorArgs
