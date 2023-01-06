@@ -29,3 +29,21 @@ test('should generate a GraphQL query with arguments', () => {
     }"
   `)
 })
+
+test('should generate a GraphQL query with nested arguments', () => {
+  expect(
+    generateGraphqlQuery({
+      name: 'messages',
+      variables: { where: 'messages_bool_exp' },
+      queryParams: [{ name: 'where', fieldType: 'messages_bool_exp' }],
+      returnFields: 'id message'
+    })
+  ).toMatchInlineSnapshot(`
+    "query Messages($where: messages_bool_exp) {
+      messages(where: $where) {
+        id
+        message
+      }
+    }"
+  `)
+})

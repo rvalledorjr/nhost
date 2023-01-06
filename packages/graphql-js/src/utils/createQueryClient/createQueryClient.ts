@@ -1,11 +1,13 @@
-import { DocumentNode } from 'graphql'
-import {
+import type { DocumentNode } from 'graphql'
+import type {
   BaseGeneratedSchema,
   NhostGraphqlRequestConfig,
-  NhostGraphqlRequestResponse
+  NhostGraphqlRequestResponse,
+  QueryArgs
 } from '../../client/client.types'
 import generateGraphqlQuery from '../generateGraphqlQuery'
-import { getVariableNames, prepareReturnFields, QueryArgs } from '../prepareQueryFields'
+import getQueryParams from '../getQueryParams'
+import getReturnableFields from '../getReturnableFields'
 
 export type FetchFunction = <T = any, V = any>(
   document: string | DocumentNode,
@@ -27,13 +29,12 @@ export default function createQueryClient<Q extends object = any>(
     (queryClient, queryName) => ({
       ...queryClient,
       [queryName]: (args?: QueryArgs) => {
-        const queryParams = getVariableNames(args || {}, queryName)
-
-        const returnFields = prepareReturnFields(
+        const queryParams = getQueryParams(args || {}, queryName)
+        const returnFields = getReturnableFields({
           generatedSchema,
-          { name: queryName, type: queryName },
+          field: { name: queryName, type: queryName },
           args
-        )
+        })
 
         const graphqlQuery = generateGraphqlQuery({
           name: queryName,

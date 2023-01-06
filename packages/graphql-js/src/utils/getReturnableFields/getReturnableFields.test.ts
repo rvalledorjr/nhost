@@ -1,13 +1,13 @@
 import { expect, test } from 'vitest'
 import { generatedSchema } from '../../testUtils/nhost.generated'
-import prepareQueryFields, { prepareReturnFields } from './prepareQueryFields'
+import getReturnableFields from './getReturnableFields'
 
 test('should prepare return fields', () => {
   expect(
-    prepareReturnFields(
+    getReturnableFields({
       generatedSchema,
-      { name: 'authors', type: 'authors' },
-      {
+      field: { name: 'authors', type: 'authors' },
+      args: {
         variables: { where: { name: { _eq: 'John Doe' } }, limit: 1 },
         select: {
           id: true,
@@ -38,15 +38,8 @@ test('should prepare return fields', () => {
           }
         }
       }
-    )
-  ).toMatchInlineSnapshot(
-    '"authors(where: $authorsWhere, limit: $authorsLimit) { __typename age id name posts(where: $authorsPostsWhere) { __typename author_id id title author { __typename age id name posts(where: $authorsPostsAuthorPostsWhere) { __typename author_id id title } } } }"'
+    })
+  ).toBe(
+    'authors(where: $authorsWhere, limit: $authorsLimit) { __typename age id name posts(where: $authorsPostsWhere) { __typename author_id id title author { __typename age id name posts(where: $authorsPostsAuthorPostsWhere) { __typename author_id id title } } } }'
   )
-})
-
-test('should prepare return values', () => {
-  expect(prepareQueryFields(generatedSchema, 'authors')).toMatchObject({
-    nonScalar: ['posts', 'posts_aggregate'],
-    scalar: ['__typename', 'age', 'id', 'name']
-  })
 })

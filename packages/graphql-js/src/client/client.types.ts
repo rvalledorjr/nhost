@@ -12,6 +12,24 @@ export interface BaseGeneratedSchema extends Record<string, any> {
   subscription: object
 }
 
+export interface SelectedFields
+  extends Record<string, boolean | Record<string, any> | SelectedFields> {}
+
+export interface QueryArgs {
+  variables?: Record<string, any>
+  select?: SelectedFields
+}
+
+export interface QueryField {
+  name: string
+  type: string
+}
+
+export interface QueryParam {
+  name: string
+  fieldType: string
+}
+
 export interface NhostGraphqlConstructorParams {
   /**
    * GraphQL endpoint.
