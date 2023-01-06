@@ -3358,19 +3358,16 @@ export interface general_comparison_exp<T> {
 }
 
 export type String_comparison_exp = general_comparison_exp<Scalars['String']> & {
-  _nin?: Maybe<Array<Scalars['String']>>
-  /** does the column NOT match the given POSIX regular expression, case insensitive */
-  _niregex?: Maybe<Scalars['String']>
-  /** does the column NOT match the given pattern */
+  _like?: Maybe<Scalars['String']>
+  _ilike?: Maybe<Scalars['String']>
   _nlike?: Maybe<Scalars['String']>
-  /** does the column NOT match the given POSIX regular expression, case sensitive */
-  _nregex?: Maybe<Scalars['String']>
-  /** does the column NOT match the given SQL regular expression */
-  _nsimilar?: Maybe<Scalars['String']>
-  /** does the column match the given POSIX regular expression, case sensitive */
-  _regex?: Maybe<Scalars['String']>
-  /** does the column match the given SQL regular expression */
+  _nilike?: Maybe<Scalars['String']>
   _similar?: Maybe<Scalars['String']>
+  _nsimilar?: Maybe<Scalars['String']>
+  _regex?: Maybe<Scalars['String']>
+  _iregex?: Maybe<Scalars['String']>
+  _nregex?: Maybe<Scalars['String']>
+  _niregex?: Maybe<Scalars['String']>
 }
 
 export type BooleanExpression<T> = {
@@ -3423,23 +3420,23 @@ export interface Post {
 
 // Where inputs
 
-export interface AuthorWhereQueryInput {
-  _and?: Enumerable<AuthorWhereQueryInput>
-  _or?: Enumerable<AuthorWhereQueryInput>
-  _not?: AuthorWhereQueryInput
+export interface AuthorsWhereQueryInput {
+  _and?: Enumerable<AuthorsWhereQueryInput>
+  _or?: Enumerable<AuthorsWhereQueryInput>
+  _not?: AuthorsWhereQueryInput
   id?: general_comparison_exp<Scalars['uuid']>
   name?: String_comparison_exp
   age?: general_comparison_exp<Scalars['Int']>
-  posts?: PostWhereQueryInput
+  posts?: PostsWhereQueryInput
 }
 
-export interface PostWhereQueryInput {
-  _and?: Enumerable<PostWhereQueryInput>
-  _or?: Enumerable<PostWhereQueryInput>
-  _not?: PostWhereQueryInput
+export interface PostsWhereQueryInput {
+  _and?: Enumerable<PostsWhereQueryInput>
+  _or?: Enumerable<PostsWhereQueryInput>
+  _not?: PostsWhereQueryInput
   id?: general_comparison_exp<Scalars['uuid']>
   title?: String_comparison_exp
-  author?: AuthorWhereQueryInput
+  author_id?: general_comparison_exp<Scalars['uuid']>
 }
 
 // Select inputs
@@ -3449,52 +3446,65 @@ export interface AuthorSelect {
   id?: boolean
   name?: boolean
   age?: boolean
-  posts?: boolean | PostArgs
+  posts?: boolean | PostsArgs
 }
 
-export interface PostSelect {
+export interface AuthorsSelect {
+  __typename?: boolean
+  id?: boolean
+  name?: boolean
+  age?: boolean
+  posts?: boolean | PostsArgs
+}
+
+export interface PostsSelect {
   __typename?: boolean
   id?: boolean
   title?: boolean
+  author_id?: boolean
   author?: boolean | AuthorArgs
 }
 
 export interface AuthorArgs {
-  variables?: ListQueryArgs<Author> & {
-    where?: AuthorWhereQueryInput
-  }
   select?: AuthorSelect
 }
 
-export interface PostArgs {
-  variables: ListQueryArgs<Post> & {
-    where?: PostWhereQueryInput
+export interface AuthorsArgs {
+  variables?: ListQueryArgs<Author> & {
+    where?: AuthorsWhereQueryInput
   }
-  select?: PostSelect
+  select?: AuthorsSelect
 }
 
-export type PostPayload<S extends boolean | null | undefined | PostArgs> = S extends true
+export interface PostsArgs {
+  variables?: ListQueryArgs<Post> & {
+    where?: PostsWhereQueryInput
+  }
+  select?: PostsSelect
+}
+
+export type PostsPayload<S extends boolean | null | undefined | PostsArgs> = S extends true
   ? Post
   : S extends undefined
   ? never
-  : S extends { select: any } & PostArgs
+  : S extends { select: any } & PostsArgs
   ? {
       [P in TruthyKeys<S['select']>]: P extends 'author'
-        ? AuthorPayload<S['select'][P]>
+        ? AuthorsPayload<S['select'][P]>
         : P extends keyof Post
         ? Post[P]
         : never
     }
   : Post
 
-export type AuthorPayload<S extends boolean | null | undefined | AuthorArgs> = S extends true
+export type AuthorsPayload<S extends boolean | null | undefined | AuthorsArgs> = S extends true
   ? Author
   : S extends undefined
   ? never
-  : S extends { select: any } & AuthorArgs
+  : S extends { select: any } & AuthorsArgs
   ? {
       [P in TruthyKeys<S['select']>]: P extends 'posts'
-        ? Array<PostPayload<S['select'][P]>>
+        ? Array<PostsPayload<S['select'][P]>>
         : P extends keyof Author
         ? Author[P]
         : never
@@ -3502,6 +3512,8 @@ export type AuthorPayload<S extends boolean | null | undefined | AuthorArgs> = S
   : Author
 
 export interface Query {
-  authors: <T extends AuthorArgs>(args?: SelectSubset<T, AuthorArgs>) => Promise<AuthorPayload<T>[]>
-  posts: <T extends PostArgs>(args?: SelectSubset<T, PostArgs>) => Promise<PostPayload<T>[]>
+  authors: <T extends AuthorsArgs>(
+    args?: SelectSubset<T, AuthorsArgs>
+  ) => Promise<AuthorsPayload<T>[]>
+  posts: <T extends PostsArgs>(args?: SelectSubset<T, PostsArgs>) => Promise<PostsPayload<T>[]>
 }

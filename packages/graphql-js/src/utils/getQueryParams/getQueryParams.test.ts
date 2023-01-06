@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest'
+import { generatedSchema } from '../../testUtils/nhost.generated'
 import getQueryParams from './getQueryParams'
 
 test('should generate proper query parameters', () => {
@@ -29,16 +30,19 @@ test('should generate proper query parameters', () => {
           }
         }
       },
-      'authors'
+      'authors',
+      generatedSchema
     )
   ).toStrictEqual([
     {
-      fieldType: 'authors',
-      name: 'where'
+      name: 'where',
+      path: 'authors',
+      type: 'authors_bool_exp'
     },
     {
-      fieldType: 'authors.posts',
-      name: 'where'
+      name: 'where',
+      path: 'authors.posts',
+      type: 'posts_bool_exp'
     }
   ])
 })

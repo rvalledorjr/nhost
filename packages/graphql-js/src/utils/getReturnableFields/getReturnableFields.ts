@@ -4,11 +4,8 @@ import type {
   QueryField,
   QueryParam
 } from '../../client/client.types'
+import capitalize from '../capitalize'
 import getQueryParams from '../getQueryParams'
-
-function capitalize(text: string) {
-  return `${text.charAt(0).toUpperCase()}${text.slice(1)}`
-}
 
 export interface GetReturnableFieldsOptions<S extends BaseGeneratedSchema = any> {
   /**
@@ -27,7 +24,7 @@ export interface GetReturnableFieldsOptions<S extends BaseGeneratedSchema = any>
    * The previous field that was used to get the return fields for.
    *
    * @internal
-   * @default '''
+   * @default ''
    */
   previousField?: string
   /**
@@ -53,14 +50,14 @@ export default function getReturnableFields<S extends BaseGeneratedSchema = any>
   previousQueryParams
 }: GetReturnableFieldsOptions<S>): string {
   const generatedFields = generatedSchema[field.type]
-  const queryParams = previousQueryParams || getQueryParams(args || {}, field.name)
+  const queryParams = previousQueryParams || getQueryParams(args || {}, field.name, generatedSchema)
 
-  const currentQueryParams = queryParams?.filter(({ fieldType }) => {
+  const currentQueryParams = queryParams?.filter(({ path }) => {
     if (previousField) {
-      return fieldType === `${previousField}.${field.name}`
+      return path === `${previousField}.${field.name}`
     }
 
-    return fieldType === field.name
+    return path === field.name
   })
 
   const { scalar, nonScalar } = Object.keys(generatedFields || {}).reduce(
@@ -110,10 +107,10 @@ export default function getReturnableFields<S extends BaseGeneratedSchema = any>
     currentQueryParams.length > 0
       ? `(${currentQueryParams
           .map(
-            ({ fieldType, name }) =>
-              `${name}: $${fieldType
+            ({ name, path }) =>
+              `${name}: $${path
                 .split('.')
-                .map((fieldPart, index) => (index > 0 ? capitalize(fieldPart) : fieldPart))
+                .map((pathPart, index) => (index > 0 ? capitalize(pathPart) : pathPart))
                 .join('')}${capitalize(name)}`
           )
           .join(', ')})`

@@ -5,7 +5,7 @@ import type {
   NhostGraphqlRequestResponse,
   QueryArgs
 } from '../../client/client.types'
-import generateGraphqlQuery from '../generateGraphqlQuery'
+import getGraphqlQueryString from '../getGraphqlQueryString'
 import getQueryParams from '../getQueryParams'
 import getReturnableFields from '../getReturnableFields'
 
@@ -15,6 +15,13 @@ export type FetchFunction = <T = any, V = any>(
   config?: NhostGraphqlRequestConfig & { useAxios: false }
 ) => Promise<NhostGraphqlRequestResponse<T>>
 
+/**
+ * Creates a query client from a generated schema.
+ *
+ * @param generatedSchema - The generated schema.
+ * @param fetch - Function to use for fetching data.
+ * @returns A query client.
+ */
 export default function createQueryClient<Q extends object = any>(
   generatedSchema?: BaseGeneratedSchema,
   fetch?: FetchFunction
@@ -29,18 +36,17 @@ export default function createQueryClient<Q extends object = any>(
     (queryClient, queryName) => ({
       ...queryClient,
       [queryName]: (args?: QueryArgs) => {
-        const queryParams = getQueryParams(args || {}, queryName)
+        const queryParams = getQueryParams(args || {}, queryName, generatedSchema)
         const returnFields = getReturnableFields({
           generatedSchema,
           field: { name: queryName, type: queryName },
           args
         })
 
-        const graphqlQuery = generateGraphqlQuery({
+        const graphqlQuery = getGraphqlQueryString({
           name: queryName,
           returnFields,
           queryParams,
-          // TODO: Gather all variables from the args object (even nested ones)
           variables: args?.variables
             ? Object.keys(args.variables).reduce(
                 (currentArguments, key) => ({
@@ -58,6 +64,7 @@ export default function createQueryClient<Q extends object = any>(
             return
           }
 
+          // note: we need to include nested variables here as well
           const { data, error } = await fetch?.(graphqlQuery, args?.variables, { useAxios: false })
 
           if (error) {

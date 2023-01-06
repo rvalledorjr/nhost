@@ -27,7 +27,8 @@ export interface QueryField {
 
 export interface QueryParam {
   name: string
-  fieldType: string
+  path: string
+  type?: string
 }
 
 export interface NhostGraphqlConstructorParams {
