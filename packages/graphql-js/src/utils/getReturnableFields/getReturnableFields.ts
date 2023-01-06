@@ -8,11 +8,11 @@ import capitalize from '../capitalize'
 import getQueryParams from '../getQueryParams'
 import normalizeType from '../normalizeType'
 
-export interface GetReturnableFieldsOptions<S extends BaseGeneratedSchema = any> {
+export interface GetReturnableFieldsOptions {
   /**
    * Generated schema.
    */
-  generatedSchema: S
+  generatedSchema: BaseGeneratedSchema
   /**
    * The field to get the return fields for.
    */
@@ -43,13 +43,13 @@ export interface GetReturnableFieldsOptions<S extends BaseGeneratedSchema = any>
  * @param options - Options to configure the returnable fields.
  * @returns The returnable fields.
  */
-export default function getReturnableFields<S extends BaseGeneratedSchema = any>({
+export default function getReturnableFields({
   generatedSchema,
   field,
   args,
   previousField = '',
   previousQueryParams
-}: GetReturnableFieldsOptions<S>): string {
+}: GetReturnableFieldsOptions): string {
   const generatedFields = generatedSchema[field.type]
   const queryParams = previousQueryParams || getQueryParams({ generatedSchema, args, field })
 

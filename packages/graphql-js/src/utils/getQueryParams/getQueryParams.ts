@@ -20,6 +20,12 @@ export interface GetQueryParamsOptions {
   generatedSchema: BaseGeneratedSchema
 }
 
+/**
+ * Returns all the query params for a query based on the selected fields.
+ *
+ * @param options - Options to configure the query params.
+ * @returns The query params.
+ */
 export default function getQueryParams({
   generatedSchema,
   args,

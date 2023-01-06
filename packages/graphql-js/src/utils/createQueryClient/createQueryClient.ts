@@ -21,12 +21,12 @@ export type FetchFunction = <T = any, V = any>(
  * Creates a query client from a generated schema.
  *
  * @param generatedSchema - The generated schema.
- * @param fetch - Function to use for fetching data.
+ * @param fetchQuery - Function to use for fetching data.
  * @returns A query client.
  */
 export default function createQueryClient<Q extends object = any>(
   generatedSchema?: BaseGeneratedSchema,
-  fetch?: FetchFunction
+  fetchQuery?: FetchFunction
 ) {
   if (!generatedSchema) {
     return {} as Q
@@ -58,16 +58,21 @@ export default function createQueryClient<Q extends object = any>(
         })
 
         return new Promise(async (resolve, reject) => {
-          if (!fetch) {
+          if (!fetchQuery) {
             resolve(null)
+
             return
           }
 
           // note: we need to include nested variables here as well
-          const { data, error } = await fetch?.(graphqlQuery, args?.variables, { useAxios: false })
+          const { data, error } = await fetchQuery?.(graphqlQuery, args?.variables, {
+            useAxios: false
+          })
 
           if (error) {
             reject(error)
+
+            return
           }
 
           resolve(data?.[queryName])
