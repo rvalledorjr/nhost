@@ -8,11 +8,40 @@ test('should prepare return fields', () => {
       generatedSchema,
       { name: 'authors', type: 'authors' },
       {
-        variables: { where: { _eq: 'Post 1' }, limit: 1 },
-        select: { id: true, title: true }
+        variables: { where: { name: { _eq: 'John Doe' } }, limit: 1 },
+        select: {
+          id: true,
+          posts: {
+            variables: {
+              where: {
+                title: {
+                  _eq: 'asd'
+                }
+              }
+            },
+            select: {
+              author: {
+                select: {
+                  posts: {
+                    variables: {
+                      where: {
+                        title: { _eq: 'asd2' }
+                      }
+                    },
+                    select: {
+                      id: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     )
-  ).toMatchInlineSnapshot('"authors(where: $where, limit: $limit) { id }"')
+  ).toMatchInlineSnapshot(
+    '"authors(where: $authorsWhere, limit: $authorsLimit) { __typename age id name posts(where: $authorsPostsWhere) { __typename author_id id title author { __typename age id name posts(where: $authorsPostsAuthorPostsWhere) { __typename author_id id title } } } }"'
+  )
 })
 
 test('should prepare return values', () => {

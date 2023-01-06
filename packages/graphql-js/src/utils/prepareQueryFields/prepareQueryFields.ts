@@ -43,26 +43,28 @@ export function prepareReturnFields<S extends BaseGeneratedSchema = any>(
   generatedSchema: S,
   field: QueryField,
   config: QueryArgs,
-  previousField?: string
+  previousField?: string,
+  previousVariables?: { field: string; variable: string }[]
 ): string {
-  const variables = getVariableNames(config, field.name)
+  const variables = previousVariables || getVariableNames(config, field.name)
   const currentVariables = variables?.filter(({ field: variableField }) =>
     previousField
       ? variableField === `${previousField}.${field.name}`
       : variableField === field.name
   )
+
   const fields = generatedSchema[field.type]
 
   const { scalar, nonScalar } = Object.keys(fields || {}).reduce(
     ({ scalar, nonScalar }, field) => {
-      if (!config.select?.[field]) {
-        return { nonScalar, scalar }
-      }
-
       const fieldType = fields[field]?.__type.replace(/!|\[|\]/g, '')
 
       if (typeof generatedSchema[fieldType] === 'undefined') {
         return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
+      }
+
+      if (config.select && !config.select[field]) {
+        return { scalar, nonScalar }
       }
 
       return { scalar, nonScalar: [...nonScalar, { name: field, type: fieldType }] }
@@ -73,14 +75,20 @@ export function prepareReturnFields<S extends BaseGeneratedSchema = any>(
     }
   )
 
-  const returnFields = [
-    ...scalar.map(({ name }) => name),
-    ...nonScalar.map(({ name, type }) =>
-      prepareReturnFields(generatedSchema, { name, type }, config.select?.[name] as QueryArgs, name)
-    )
-  ]
-
-  console.log(currentVariables, variables)
+  const returnFields = !config?.select
+    ? [...scalar.map(({ name }) => name)]
+    : [
+        ...scalar.map(({ name }) => name),
+        ...nonScalar.map((nonScalarField) =>
+          prepareReturnFields(
+            generatedSchema,
+            nonScalarField,
+            config.select?.[nonScalarField.name] as QueryArgs,
+            previousField ? `${previousField}.${field.name}` : field.name,
+            variables
+          )
+        )
+      ]
 
   if (currentVariables.length === variables.length) {
     return `${field.name}${
@@ -98,7 +106,7 @@ export function prepareReturnFields<S extends BaseGeneratedSchema = any>(
               `${variable}: $${field
                 .split('.')
                 .map((subField, index) => (index > 0 ? capitalize(subField) : subField))
-                .join()}${capitalize(variable)}`
+                .join('')}${capitalize(variable)}`
           )
           .join(', ')})`
       : ''
