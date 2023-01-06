@@ -67,12 +67,12 @@ export default function getReturnableFields<S extends BaseGeneratedSchema = any>
     ({ scalar, nonScalar }, field) => {
       const fieldType = normalizeType(generatedFields[field]?.__type)
 
-      if (typeof generatedSchema[fieldType] === 'undefined') {
-        return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
-      }
-
       if (args?.select && !args.select[field]) {
         return { scalar, nonScalar }
+      }
+
+      if (typeof generatedSchema[fieldType] === 'undefined') {
+        return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
       }
 
       return { scalar, nonScalar: [...nonScalar, { name: field, type: fieldType }] }

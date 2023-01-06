@@ -40,6 +40,6 @@ test('should prepare return fields', () => {
       }
     })
   ).toBe(
-    'authors(where: $authorsWhere, limit: $authorsLimit) { __typename age id name posts(where: $authorsPostsWhere) { __typename author_id id title author { __typename age id name posts(where: $authorsPostsAuthorPostsWhere) { __typename author_id id title } } } }'
+    'authors(where: $authorsWhere, limit: $authorsLimit) { id posts(where: $authorsPostsWhere) { author { posts(where: $authorsPostsAuthorPostsWhere) { id } } } }'
   )
 })
