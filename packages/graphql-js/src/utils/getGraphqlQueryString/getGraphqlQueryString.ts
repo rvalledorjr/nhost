@@ -11,7 +11,7 @@ export interface GetGraphqlQueryStringOptions {
   /**
    * The fields to return.
    */
-  returnFields: string
+  returnableFields: string
   /**
    * The query parameters.
    */
@@ -30,7 +30,7 @@ export interface GetGraphqlQueryStringOptions {
  */
 export default function getGraphqlQueryString({
   name,
-  returnFields,
+  returnableFields,
   queryParams,
   variables
 }: GetGraphqlQueryStringOptions) {
@@ -69,7 +69,7 @@ export default function getGraphqlQueryString({
               })
               .join(', ')})`
           : ''
-      } { ${returnFields} }}`
+      } { ${returnableFields} }}`
     )
   )
 }

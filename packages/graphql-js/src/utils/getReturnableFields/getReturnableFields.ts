@@ -50,7 +50,8 @@ export default function getReturnableFields<S extends BaseGeneratedSchema = any>
   previousQueryParams
 }: GetReturnableFieldsOptions<S>): string {
   const generatedFields = generatedSchema[field.type]
-  const queryParams = previousQueryParams || getQueryParams(args || {}, field.name, generatedSchema)
+  const queryParams =
+    previousQueryParams || getQueryParams({ generatedSchema, args, fieldName: field.name })
 
   const currentQueryParams = queryParams?.filter(({ path }) => {
     if (previousField) {

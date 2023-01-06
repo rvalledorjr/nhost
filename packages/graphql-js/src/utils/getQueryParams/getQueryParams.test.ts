@@ -4,8 +4,10 @@ import getQueryParams from './getQueryParams'
 
 test('should generate proper query parameters', () => {
   expect(
-    getQueryParams(
-      {
+    getQueryParams({
+      generatedSchema,
+      fieldName: 'authors',
+      args: {
         variables: {
           where: {
             id: {
@@ -29,10 +31,8 @@ test('should generate proper query parameters', () => {
             }
           }
         }
-      },
-      'authors',
-      generatedSchema
-    )
+      }
+    })
   ).toStrictEqual([
     {
       name: 'where',

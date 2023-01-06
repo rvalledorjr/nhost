@@ -36,17 +36,18 @@ export default function createQueryClient<Q extends object = any>(
     (queryClient, queryName) => ({
       ...queryClient,
       [queryName]: (args?: QueryArgs) => {
-        const queryParams = getQueryParams(args || {}, queryName, generatedSchema)
-        const returnFields = getReturnableFields({
-          generatedSchema,
-          field: { name: queryName, type: queryName },
-          args
-        })
-
         const graphqlQuery = getGraphqlQueryString({
           name: queryName,
-          returnFields,
-          queryParams,
+          queryParams: getQueryParams({
+            generatedSchema,
+            args,
+            fieldName: queryName
+          }),
+          returnableFields: getReturnableFields({
+            generatedSchema,
+            args,
+            field: { name: queryName, type: queryName }
+          }),
           variables: args?.variables
             ? Object.keys(args.variables).reduce(
                 (currentArguments, key) => ({
