@@ -5,7 +5,7 @@ import {
   NhostGraphqlRequestResponse
 } from '../../client/client.types'
 import generateGraphqlQuery from '../generateGraphqlQuery'
-import prepareQueryFields, { QueryArgs } from '../prepareQueryFields'
+import { getVariableNames, prepareReturnFields, QueryArgs } from '../prepareQueryFields'
 
 export type FetchFunction = <T = any, V = any>(
   document: string | DocumentNode,
@@ -27,11 +27,19 @@ export default function createQueryClient<Q extends object = any>(
     (queryClient, queryName) => ({
       ...queryClient,
       [queryName]: (args?: QueryArgs) => {
-        const { scalar: scalarFields } = prepareQueryFields(generatedSchema, queryName)
+        const queryParams = getVariableNames(args || {}, queryName)
+
+        const returnFields = prepareReturnFields(
+          generatedSchema,
+          { name: queryName, type: queryName },
+          args
+        )
 
         const graphqlQuery = generateGraphqlQuery({
           name: queryName,
-          returnFields: scalarFields,
+          returnFields,
+          queryParams,
+          // TODO: Gather all variables from the args object (even nested ones)
           variables: args?.variables
             ? Object.keys(args.variables).reduce(
                 (currentArguments, key) => ({

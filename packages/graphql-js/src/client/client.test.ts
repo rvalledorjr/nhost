@@ -89,6 +89,7 @@ test('should return authors that are older than 25', async () => {
   ])
 })
 
+// TODO: Add support for this
 test.skip('should return only the fields that are selected', async () => {
   const authors = await client.query.authors({
     variables: {

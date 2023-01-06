@@ -42,11 +42,11 @@ export function getVariableNames(
 export function prepareReturnFields<S extends BaseGeneratedSchema = any>(
   generatedSchema: S,
   field: QueryField,
-  config: QueryArgs,
+  config?: QueryArgs,
   previousField?: string,
   previousVariables?: { field: string; variable: string }[]
 ): string {
-  const variables = previousVariables || getVariableNames(config, field.name)
+  const variables = previousVariables || getVariableNames(config || {}, field.name)
   const currentVariables = variables?.filter(({ field: variableField }) =>
     previousField
       ? variableField === `${previousField}.${field.name}`
@@ -63,7 +63,7 @@ export function prepareReturnFields<S extends BaseGeneratedSchema = any>(
         return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
       }
 
-      if (config.select && !config.select[field]) {
+      if (config?.select && !config.select[field]) {
         return { scalar, nonScalar }
       }
 

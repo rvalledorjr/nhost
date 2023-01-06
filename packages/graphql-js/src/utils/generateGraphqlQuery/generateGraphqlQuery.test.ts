@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import generateGraphqlQuery from './generateGraphqlQuery'
 
 test('should generate a GraphQL query without arguments', () => {
-  expect(generateGraphqlQuery({ name: 'messages', returnFields: ['id', 'message'] }))
+  expect(generateGraphqlQuery({ name: 'messages', returnFields: 'id message' }))
     .toMatchInlineSnapshot(`
     "query Messages {
       messages {
@@ -18,10 +18,10 @@ test('should generate a GraphQL query with arguments', () => {
     generateGraphqlQuery({
       name: 'messages',
       variables: { where: 'messages_bool_exp' },
-      returnFields: ['id', 'message']
+      returnFields: 'id message'
     })
   ).toMatchInlineSnapshot(`
-    "query Messages($where: messages_bool_exp) {
+    "query Messages {
       messages(where: $where) {
         id
         message
