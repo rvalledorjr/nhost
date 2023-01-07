@@ -27,10 +27,12 @@ export interface GetGraphqlQueryStringOptions {
 export default function getGraphqlQueryString({
   name,
   returnableFields,
-  queryParams
+  queryParams,
 }: GetGraphqlQueryStringOptions) {
   const mappedQueryParams = queryParams?.filter(({ type }) => Boolean(type))
-  const allParamPaths = new Set(mappedQueryParams?.map(({ path }) => path) || [])
+  const allParamPaths = new Set(
+    mappedQueryParams?.map(({ path }) => path) || [],
+  )
 
   return print(
     parse(
@@ -44,12 +46,14 @@ export default function getGraphqlQueryString({
 
                 return `$${path
                   .split('.')
-                  .map((pathPart, index) => (index > 0 ? capitalize(pathPart) : pathPart))
+                  .map((pathPart, index) =>
+                    index > 0 ? capitalize(pathPart) : pathPart,
+                  )
                   .join('')}${capitalize(name)}: ${type}`
               })
               .join(', ')})`
           : ''
-      } { ${returnableFields} }`
-    )
+      } { ${returnableFields} }`,
+    ),
   )
 }

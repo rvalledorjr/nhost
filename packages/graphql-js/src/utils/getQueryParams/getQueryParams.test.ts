@@ -11,9 +11,9 @@ test('should generate proper query parameters', () => {
         variables: {
           where: {
             id: {
-              _eq: 'Name'
-            }
-          }
+              _eq: 'Name',
+            },
+          },
         },
         select: {
           id: true,
@@ -21,28 +21,28 @@ test('should generate proper query parameters', () => {
             variables: {
               where: {
                 id: {
-                  _eq: 'Name'
-                }
-              }
+                  _eq: 'Name',
+                },
+              },
             },
             select: {
               id: true,
-              title: true
-            }
-          }
-        }
-      }
-    })
+              title: true,
+            },
+          },
+        },
+      },
+    }),
   ).toStrictEqual([
     {
       name: 'where',
       path: 'authors',
-      type: 'authors_bool_exp'
+      type: 'authors_bool_exp',
     },
     {
       name: 'where',
       path: 'authors.posts',
-      type: 'posts_bool_exp'
-    }
+      type: 'posts_bool_exp',
+    },
   ])
 })

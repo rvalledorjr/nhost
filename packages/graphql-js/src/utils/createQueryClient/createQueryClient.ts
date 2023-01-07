@@ -4,7 +4,7 @@ import type {
   NhostGraphqlRequestConfig,
   NhostGraphqlRequestResponse,
   QueryArgs,
-  QueryField
+  QueryField,
 } from '../../client/client.types'
 import getGraphqlQueryString from '../getGraphqlQueryString'
 import getQueryParams from '../getQueryParams'
@@ -14,7 +14,7 @@ import normalizeType from '../normalizeType'
 export type FetchFunction = <T = any, V = any>(
   document: string | DocumentNode,
   variables?: V,
-  config?: NhostGraphqlRequestConfig & { useAxios: false }
+  config?: NhostGraphqlRequestConfig & { useAxios: false },
 ) => Promise<NhostGraphqlRequestResponse<T>>
 
 /**
@@ -26,7 +26,7 @@ export type FetchFunction = <T = any, V = any>(
  */
 export default function createQueryClient<Q extends object = any>(
   generatedSchema?: BaseGeneratedSchema,
-  fetchQuery?: FetchFunction
+  fetchQuery?: FetchFunction,
 ) {
   if (!generatedSchema) {
     return {} as Q
@@ -40,7 +40,7 @@ export default function createQueryClient<Q extends object = any>(
       [queryName]: (args?: QueryArgs) => {
         const field: QueryField = {
           name: queryName,
-          type: normalizeType(generatedQueries[queryName]?.__type)
+          type: normalizeType(generatedQueries[queryName]?.__type),
         }
 
         const graphqlQuery = getGraphqlQueryString({
@@ -48,13 +48,13 @@ export default function createQueryClient<Q extends object = any>(
           queryParams: getQueryParams({
             generatedSchema,
             args,
-            field
+            field,
           }),
           returnableFields: getReturnableFields({
             generatedSchema,
             args,
-            field
-          })
+            field,
+          }),
         })
 
         return new Promise(async (resolve, reject) => {
@@ -65,9 +65,13 @@ export default function createQueryClient<Q extends object = any>(
           }
 
           // note: we need to include nested variables here as well
-          const { data, error } = await fetchQuery?.(graphqlQuery, args?.variables, {
-            useAxios: false
-          })
+          const { data, error } = await fetchQuery?.(
+            graphqlQuery,
+            args?.variables,
+            {
+              useAxios: false,
+            },
+          )
 
           if (error) {
             reject(error)
@@ -77,8 +81,8 @@ export default function createQueryClient<Q extends object = any>(
 
           resolve(data?.[queryName])
         })
-      }
+      },
     }),
-    {} as Q
+    {} as Q,
   )
 }

@@ -15,9 +15,9 @@ test('should prepare return fields', () => {
             variables: {
               where: {
                 title: {
-                  _eq: 'asd'
-                }
-              }
+                  _eq: 'asd',
+                },
+              },
             },
             select: {
               author: {
@@ -25,21 +25,21 @@ test('should prepare return fields', () => {
                   posts: {
                     variables: {
                       where: {
-                        title: { _eq: 'asd2' }
-                      }
+                        title: { _eq: 'asd2' },
+                      },
                     },
                     select: {
-                      id: true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
+                      id: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
   ).toBe(
-    'authors(where: $authorsWhere, limit: $authorsLimit) { id posts(where: $authorsPostsWhere) { author { posts(where: $authorsPostsAuthorPostsWhere) { id } } } }'
+    'authors(where: $authorsWhere, limit: $authorsLimit) { id posts(where: $authorsPostsWhere) { author { posts(where: $authorsPostsAuthorPostsWhere) { id } } } }',
   )
 })

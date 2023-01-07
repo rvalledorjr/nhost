@@ -2,7 +2,7 @@ import type {
   BaseGeneratedSchema,
   QueryArgs,
   QueryField,
-  QueryParam
+  QueryParam,
 } from '../../client/client.types'
 import capitalize from '../capitalize'
 import getQueryParams from '../getQueryParams'
@@ -27,7 +27,7 @@ export interface GetReturnableFieldsOptions {
    * @internal
    * @default ''
    */
-  previousField?: string
+  previousPath?: string
   /**
    * The previous query params that were used to get the return fields for.
    *
@@ -47,15 +47,16 @@ export default function getReturnableFields({
   generatedSchema,
   field,
   args,
-  previousField = '',
-  previousQueryParams
+  previousPath = '',
+  previousQueryParams,
 }: GetReturnableFieldsOptions): string {
   const generatedFields = generatedSchema[field.type]
-  const queryParams = previousQueryParams || getQueryParams({ generatedSchema, args, field })
+  const queryParams =
+    previousQueryParams || getQueryParams({ generatedSchema, args, field })
 
   const currentQueryParams = queryParams?.filter(({ path }) => {
-    if (previousField) {
-      return path === `${previousField}.${field.name}`
+    if (previousPath) {
+      return path === `${previousPath}.${field.name}`
     }
 
     return path === field.name
@@ -70,15 +71,21 @@ export default function getReturnableFields({
       }
 
       if (typeof generatedSchema[fieldType] === 'undefined') {
-        return { nonScalar, scalar: [...scalar, { name: field, type: fieldType }] }
+        return {
+          nonScalar,
+          scalar: [...scalar, { name: field, type: fieldType }],
+        }
       }
 
-      return { scalar, nonScalar: [...nonScalar, { name: field, type: fieldType }] }
+      return {
+        scalar,
+        nonScalar: [...nonScalar, { name: field, type: fieldType }],
+      }
     },
     {
       scalar: [] as QueryField[],
-      nonScalar: [] as QueryField[]
-    }
+      nonScalar: [] as QueryField[],
+    },
   )
 
   const returnFields = !args?.select
@@ -90,16 +97,20 @@ export default function getReturnableFields({
             generatedSchema,
             field: nonScalarField,
             args: args.select?.[nonScalarField.name] as QueryArgs,
-            previousField: previousField ? `${previousField}.${field.name}` : field.name,
-            previousQueryParams: queryParams
-          })
-        )
+            previousPath: previousPath
+              ? `${previousPath}.${field.name}`
+              : field.name,
+            previousQueryParams: queryParams,
+          }),
+        ),
       ]
 
   if (currentQueryParams.length === queryParams.length) {
     return `${field.name}${
       currentQueryParams.length > 0
-        ? `(${currentQueryParams.map(({ name }) => `${name}: $${name}`).join(', ')})`
+        ? `(${currentQueryParams
+            .map(({ name }) => `${name}: $${name}`)
+            .join(', ')})`
         : ''
     } { ${returnFields.join(' ')} }`
   }
@@ -111,8 +122,10 @@ export default function getReturnableFields({
             ({ name, path }) =>
               `${name}: $${path
                 .split('.')
-                .map((pathPart, index) => (index > 0 ? capitalize(pathPart) : pathPart))
-                .join('')}${capitalize(name)}`
+                .map((pathPart, index) =>
+                  index > 0 ? capitalize(pathPart) : pathPart,
+                )
+                .join('')}${capitalize(name)}`,
           )
           .join(', ')})`
       : ''

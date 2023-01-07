@@ -13,7 +13,7 @@ export interface BaseGeneratedSchema extends Record<string, any> {
 }
 
 export interface SelectedFields
-  extends Record<string, boolean | Record<string, any> | SelectedFields> {}
+  extends Record<string, boolean | QueryArgs | SelectedFields> {}
 
 export interface QueryArgs {
   variables?: Record<string, any>

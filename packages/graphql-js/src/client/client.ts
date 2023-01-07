@@ -5,7 +5,7 @@ import type {
   DeprecatedNhostGraphqlRequestResponse,
   NhostGraphqlConstructorParams,
   NhostGraphqlRequestConfig,
-  NhostGraphqlRequestResponse
+  NhostGraphqlRequestResponse,
 } from './client.types'
 
 /**
@@ -14,7 +14,7 @@ import type {
 export class NhostGraphqlClient<
   GeneratedQuery extends {} = any,
   GeneratedMutation extends {} = any,
-  GeneratedSubscription extends {} = any
+  GeneratedSubscription extends {} = any,
 > {
   readonly url: string
   private instance: AxiosInstance
@@ -32,10 +32,13 @@ export class NhostGraphqlClient<
     this.accessToken = null
     this.adminSecret = adminSecret
     this.instance = axios.create({
-      baseURL: url
+      baseURL: url,
     })
 
-    this.query = createQueryClient<GeneratedQuery>(params.generatedSchema, this.request.bind(this))
+    this.query = createQueryClient<GeneratedQuery>(
+      params.generatedSchema,
+      this.request.bind(this),
+    )
     this.mutation = {} as GeneratedMutation
     this.subscription = {} as GeneratedSubscription
   }
@@ -44,13 +47,15 @@ export class NhostGraphqlClient<
   async request<T = any, V = any>(
     document: string | DocumentNode,
     variables?: V,
-    config?: (AxiosRequestConfig | NhostGraphqlRequestConfig) & { useAxios?: true }
+    config?: (AxiosRequestConfig | NhostGraphqlRequestConfig) & {
+      useAxios?: true
+    },
   ): Promise<DeprecatedNhostGraphqlRequestResponse<T>>
 
   async request<T = any, V = any>(
     document: string | DocumentNode,
     variables?: V,
-    config?: NhostGraphqlRequestConfig & { useAxios: false }
+    config?: NhostGraphqlRequestConfig & { useAxios: false },
   ): Promise<NhostGraphqlRequestResponse<T>>
 
   /**
@@ -77,13 +82,17 @@ export class NhostGraphqlClient<
     {
       useAxios = true,
       ...config
-    }: (AxiosRequestConfig | NhostGraphqlRequestConfig) & { useAxios?: boolean } = {}
-  ): Promise<DeprecatedNhostGraphqlRequestResponse<T> | NhostGraphqlRequestResponse<T>> {
+    }: (AxiosRequestConfig | NhostGraphqlRequestConfig) & {
+      useAxios?: boolean
+    } = {},
+  ): Promise<
+    DeprecatedNhostGraphqlRequestResponse<T> | NhostGraphqlRequestResponse<T>
+  > {
     // add auth headers if any
     const headers = {
       'Accept-Encoding': '*',
       ...this.generateAccessTokenHeaders(),
-      ...config?.headers
+      ...config?.headers,
     }
 
     try {
@@ -96,9 +105,9 @@ export class NhostGraphqlClient<
         {
           operationName: operationName || undefined,
           query: typeof document === 'string' ? document : print(document),
-          variables
+          variables,
         },
-        { ...config, headers }
+        { ...config, headers },
       )
 
       const responseData = res.data
@@ -107,7 +116,7 @@ export class NhostGraphqlClient<
       if (responseData.errors) {
         return {
           data: null,
-          error: responseData.errors
+          error: responseData.errors,
         }
       }
 
@@ -115,7 +124,7 @@ export class NhostGraphqlClient<
         if (useAxios) {
           return {
             data: null,
-            error: new Error('incorrect response data from GraphQL server')
+            error: new Error('incorrect response data from GraphQL server'),
           }
         }
         return {
@@ -123,8 +132,8 @@ export class NhostGraphqlClient<
           error: {
             error: 'invalid-response',
             status: 0,
-            message: 'incorrect response data from GraphQL server'
-          }
+            message: 'incorrect response data from GraphQL server',
+          },
         }
       }
 
@@ -137,7 +146,7 @@ export class NhostGraphqlClient<
         }
         return {
           data: null,
-          error: new Error('Unable to get do GraphQL request')
+          error: new Error('Unable to get do GraphQL request'),
         }
       }
 
@@ -147,8 +156,8 @@ export class NhostGraphqlClient<
         error: {
           error: axiosError.code || 'unknown',
           status: axiosError.status || 0,
-          message: axiosError.message
-        }
+          message: axiosError.message,
+        },
       }
     }
   }
@@ -189,12 +198,12 @@ export class NhostGraphqlClient<
   private generateAccessTokenHeaders(): Record<string, string> {
     if (this.adminSecret) {
       return {
-        'x-hasura-admin-secret': this.adminSecret
+        'x-hasura-admin-secret': this.adminSecret,
       }
     }
     if (this.accessToken) {
       return {
-        Authorization: `Bearer ${this.accessToken}`
+        Authorization: `Bearer ${this.accessToken}`,
       }
     }
     return {}
