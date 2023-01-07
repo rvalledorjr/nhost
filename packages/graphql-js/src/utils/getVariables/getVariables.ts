@@ -1,5 +1,5 @@
 import type { QueryArgs, QueryField } from '../../client/client.types'
-import capitalize from '../capitalize'
+import camelizeDotNotation from '../camelizeDotNotation'
 
 export interface GetVariablesOptions {
   /**
@@ -16,17 +16,6 @@ export interface GetVariablesOptions {
   previousPath?: string
 }
 
-function dotNotationToCamelCase(text?: string) {
-  if (!text) {
-    return ''
-  }
-
-  return text
-    .split('.')
-    .map((pathPart, index) => (index > 0 ? capitalize(pathPart) : pathPart))
-    .join('')
-}
-
 export default function getVariables({
   args,
   field,
@@ -41,9 +30,8 @@ export default function getVariables({
       return Object.keys(args.variables || {}).reduce(
         (variables, key) => ({
           ...variables,
-          [`${dotNotationToCamelCase(previousPath)}${capitalize(
-            field.name,
-          )}${capitalize(key)}`]: args.variables![key],
+          [camelizeDotNotation(previousPath, field.name, key)]:
+            args.variables![key],
         }),
         {},
       )
@@ -81,9 +69,10 @@ export default function getVariables({
     ...Object.keys(args.variables || {}).reduce((variables, key) => {
       return {
         ...variables,
-        [`${dotNotationToCamelCase(
+        [`${camelizeDotNotation(
           previousPath ? `${previousPath}.${field.name}` : field.name,
-        )}${capitalize(key)}`]: args.variables![key],
+          key,
+        )}`]: args.variables![key],
       }
     }, {}),
     ...nestedVariables,

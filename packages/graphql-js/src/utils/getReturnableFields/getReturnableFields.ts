@@ -4,7 +4,7 @@ import type {
   QueryField,
   QueryParam,
 } from '../../client/client.types'
-import capitalize from '../capitalize'
+import camelizeDotNotation from '../camelizeDotNotation'
 import getQueryParams from '../getQueryParams'
 import normalizeType from '../normalizeType'
 
@@ -62,6 +62,9 @@ export default function getReturnableFields({
     return path === field.name
   })
 
+  // We need to distinguish between scalar and non-scalar fields. Scalar fields
+  // can be returned as is, but non-scalar fields need to be unwrapped using
+  // the generated schema.
   const { scalar, nonScalar } = Object.keys(generatedFields || {}).reduce(
     ({ scalar, nonScalar }, field) => {
       const fieldType = normalizeType(generatedFields[field]?.__type)
@@ -105,6 +108,8 @@ export default function getReturnableFields({
         ),
       ]
 
+  // We are not manipulating the name of the variable if we have all
+  // the query params passed to the current field.
   if (currentQueryParams.length === queryParams.length) {
     return `${field.name}${
       currentQueryParams.length > 0
@@ -115,17 +120,15 @@ export default function getReturnableFields({
     } { ${returnFields.join(' ')} }`
   }
 
+  // We need to manipulate the name of the variable if we have nested variables
+  // as well. For example: If both `authors` and a nested `authors.posts` have
+  // a `where` variable, we need to rename the `where` variable to
+  // `authorsWhere` and `authorsPostsWhere`.
   return `${field.name}${
     currentQueryParams.length > 0
       ? `(${currentQueryParams
           .map(
-            ({ name, path }) =>
-              `${name}: $${path
-                .split('.')
-                .map((pathPart, index) =>
-                  index > 0 ? capitalize(pathPart) : pathPart,
-                )
-                .join('')}${capitalize(name)}`,
+            ({ name, path }) => `${name}: $${camelizeDotNotation(path, name)}`,
           )
           .join(', ')})`
       : ''

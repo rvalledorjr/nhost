@@ -1,7 +1,7 @@
 import { parse, print } from 'graphql/language'
 import pascalCase from 'just-pascal-case'
 import { QueryParam } from '../../client/client.types'
-import capitalize from '../capitalize'
+import camelizeDotNotation from '../camelizeDotNotation'
 
 export interface GetGraphqlQueryStringOptions {
   /**
@@ -44,12 +44,7 @@ export default function getGraphqlQueryString({
                   return `$${name}: ${type}`
                 }
 
-                return `$${path
-                  .split('.')
-                  .map((pathPart, index) =>
-                    index > 0 ? capitalize(pathPart) : pathPart,
-                  )
-                  .join('')}${capitalize(name)}: ${type}`
+                return `$${camelizeDotNotation(path, name)}: ${type}`
               })
               .join(', ')})`
           : ''
