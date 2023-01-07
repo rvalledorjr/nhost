@@ -16,6 +16,26 @@ export interface GetVariablesOptions {
   previousPath?: string
 }
 
+function countFieldsWithVariables(args: QueryArgs) {
+  if (!args) {
+    return 0
+  }
+
+  return Object.keys(args).reduce((count, key) => {
+    if (key === 'variables' && Object.keys(args.variables || {}).length > 0) {
+      return count + 1
+    }
+
+    if (typeof args[key as keyof QueryArgs] === 'object') {
+      count += countFieldsWithVariables(
+        args[key as keyof QueryArgs] as QueryArgs,
+      )
+    }
+
+    return count
+  }, 0)
+}
+
 export default function getVariables({
   args,
   field,
@@ -65,14 +85,21 @@ export default function getVariables({
     }
   }, {})
 
+  const numberOfFieldsWithVariables = countFieldsWithVariables(args)
+
   return {
     ...Object.keys(args.variables || {}).reduce((variables, key) => {
+      const variableName =
+        numberOfFieldsWithVariables === 1
+          ? key
+          : camelizeDotNotation(
+              previousPath ? `${previousPath}.${field.name}` : field.name,
+              key,
+            )
+
       return {
         ...variables,
-        [`${camelizeDotNotation(
-          previousPath ? `${previousPath}.${field.name}` : field.name,
-          key,
-        )}`]: args.variables![key],
+        [variableName]: args.variables![key],
       }
     }, {}),
     ...nestedVariables,

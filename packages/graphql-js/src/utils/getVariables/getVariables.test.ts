@@ -127,3 +127,38 @@ test('should return dynamic variable names if there are nested selections', () =
     },
   })
 })
+
+test('should not return a dynamic variable name if only a single field contains variables', () => {
+  expect(
+    getVariables({
+      field: { name: 'authors', type: 'authors' },
+      args: {
+        variables: {
+          where: {
+            name: {
+              _eq: 'John Doe',
+            },
+          },
+        },
+        select: {
+          id: true,
+          posts: {
+            select: {
+              author: {
+                select: {
+                  posts: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ).toMatchObject({
+    where: {
+      name: {
+        _eq: 'John Doe',
+      },
+    },
+  })
+})

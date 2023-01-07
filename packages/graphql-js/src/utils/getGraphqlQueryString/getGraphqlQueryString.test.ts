@@ -7,14 +7,12 @@ test('should generate a GraphQL query without arguments', () => {
       name: 'messages',
       returnableFields: 'messages { id message }',
     }),
-  ).toMatchInlineSnapshot(`
-    "query Messages {
-      messages {
-        id
-        message
-      }
-    }"
-  `)
+  ).toBe(`query Messages {
+  messages {
+    id
+    message
+  }
+}`)
 })
 
 test('should generate a GraphQL query with arguments', () => {
