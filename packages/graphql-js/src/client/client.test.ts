@@ -75,30 +75,6 @@ test('should return authors that are older than 25', async () => {
     },
   })
 
-  const authors2 = await client.query.authors({
-    variables: {
-      where: {
-        age: {
-          _gt: 25,
-        },
-      },
-    },
-    select: {
-      posts: {
-        variables: {
-          where: {
-            author_id: {
-              _eq: '6ac21ac1-5eaa-4326-9382-7451b06906e2',
-            },
-          },
-        },
-        select: {
-          author: true,
-        },
-      },
-    },
-  })
-
   expect(authors).toStrictEqual([
     {
       __typename: 'authors',

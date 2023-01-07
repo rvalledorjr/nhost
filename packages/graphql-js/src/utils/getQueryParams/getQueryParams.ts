@@ -40,7 +40,7 @@ export default function getQueryParams({
       name: variable,
       path: field.name,
       type:
-        field.type || generatedSchema?.query?.[field.name].__args?.[variable],
+        generatedSchema?.query?.[field.name].__args?.[variable] || field.type,
     }),
   )
 

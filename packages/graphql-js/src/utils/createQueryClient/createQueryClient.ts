@@ -1,4 +1,4 @@
-import type { DocumentNode } from 'graphql'
+import { DocumentNode } from 'graphql'
 import type {
   BaseGeneratedSchema,
   NhostGraphqlRequestConfig,
@@ -9,6 +9,7 @@ import type {
 import getGraphqlQueryString from '../getGraphqlQueryString'
 import getQueryParams from '../getQueryParams'
 import getReturnableFields from '../getReturnableFields'
+import getVariables from '../getVariables'
 import normalizeType from '../normalizeType'
 
 export type FetchFunction = <T = any, V = any>(
@@ -64,10 +65,9 @@ export default function createQueryClient<Q extends object = any>(
             return
           }
 
-          // note: we need to include nested variables here as well
           const { data, error } = await fetchQuery?.(
             graphqlQuery,
-            args?.variables,
+            getVariables({ args, field }),
             {
               useAxios: false,
             },
