@@ -32,7 +32,7 @@ export default function getVariables({
   field,
   previousPath,
 }: GetVariablesOptions): Record<string, any> {
-  if (!args || (!args.variables && !args.select)) {
+  if (!args) {
     return {}
   }
 
@@ -41,8 +41,9 @@ export default function getVariables({
       return Object.keys(args.variables || {}).reduce(
         (variables, key) => ({
           ...variables,
-          [`${dotNotationToCamelCase(previousPath)}${capitalize(key)}`]:
-            args.variables![key],
+          [`${dotNotationToCamelCase(previousPath)}${capitalize(
+            field.name,
+          )}${capitalize(key)}`]: args.variables![key],
         }),
         {},
       )
@@ -64,27 +65,20 @@ export default function getVariables({
   const nestedVariables = selectedObjects.reduce((selectedVariables, key) => {
     const nestedArguments = args.select![key] as QueryArgs
 
-    console.log(key)
-
     return {
       ...selectedVariables,
       ...getVariables({
         args: nestedArguments,
         field: { name: key, type: '' },
         previousPath: previousPath
-          ? `${previousPath}.${key}`
-          : `${field.name}.${key}`,
+          ? `${previousPath}.${field.name}`
+          : field.name,
       }),
     }
   }, {})
 
   return {
     ...Object.keys(args.variables || {}).reduce((variables, key) => {
-      console.log(
-        `${dotNotationToCamelCase(
-          previousPath ? `${previousPath}.${field.name}` : field.name,
-        )}${capitalize(key)}`,
-      )
       return {
         ...variables,
         [`${dotNotationToCamelCase(

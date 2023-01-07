@@ -69,48 +69,6 @@ test('should return dynamic variable names if there are nested selections', () =
     },
   })
 
-  console.log(
-    getVariables({
-      field: { name: 'authors', type: 'authors' },
-      args: {
-        variables: {
-          where: {
-            name: {
-              _eq: 'John Doe',
-            },
-          },
-        },
-        select: {
-          id: true,
-          posts: {
-            variables: {
-              where: {
-                title: {
-                  _eq: 'Test Post',
-                },
-              },
-            },
-            select: {
-              author: {
-                select: {
-                  posts: {
-                    variables: {
-                      where: {
-                        title: {
-                          _eq: 'Nested Test Post',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    }),
-  )
-
   expect(
     getVariables({
       field: { name: 'authors', type: 'authors' },
