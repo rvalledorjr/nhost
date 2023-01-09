@@ -1,4 +1,5 @@
 import { DocumentNode } from 'graphql'
+import camelCase from 'just-camel-case'
 import type {
   BaseGeneratedSchema,
   NhostGraphqlRequestConfig,
@@ -38,7 +39,7 @@ export default function createQueryClient<Q extends object = any>(
   return Object.keys(generatedQueries).reduce(
     (queryClient, queryName) => ({
       ...queryClient,
-      [queryName]: (args?: QueryArgs) => {
+      [camelCase(queryName)]: (args?: QueryArgs) => {
         const field: QueryField = {
           name: queryName,
           type: normalizeType(generatedQueries[queryName]?.__type),

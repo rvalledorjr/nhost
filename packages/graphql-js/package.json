@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "axios": "^1.2.0",
+    "just-camel-case": "^6.2.0",
     "just-pascal-case": "^3.2.0"
   },
   "peerDependencies": {

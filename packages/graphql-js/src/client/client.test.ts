@@ -51,7 +51,6 @@ test('should return all authors', async () => {
   ])
 })
 
-// should return only authors that are older than 25
 test('should return authors that are older than 25', async () => {
   server.use(
     mockLink.query('Authors', (req, res, ctx) =>
@@ -89,4 +88,29 @@ test('should return authors that are older than 25', async () => {
       name: 'Don Doe',
     },
   ])
+})
+
+test('should return a single author by its primary key', async () => {
+  server.use(
+    mockLink.query('AuthorsByPk', (req, res, ctx) => {
+      return res(
+        ctx.data({
+          authors_by_pk: mockAuthors.find(
+            (author) => author.id === req.variables?.id,
+          ),
+        }),
+      )
+    }),
+  )
+
+  const author = await client.query.authorsByPk({
+    variables: { id: '6ac21ac1-5eaa-4326-9382-7451b06906e2' },
+  })
+
+  expect(author).toMatchObject({
+    __typename: 'authors',
+    age: 27,
+    id: '6ac21ac1-5eaa-4326-9382-7451b06906e2',
+    name: 'Jane Doe',
+  })
 })

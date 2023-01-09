@@ -3484,6 +3484,13 @@ export interface AuthorsArgs {
   select?: AuthorsSelect
 }
 
+export interface AuthorsByPkArgs {
+  variables?: {
+    id: Scalars['uuid']
+  }
+  select?: AuthorsSelect
+}
+
 export interface PostsArgs {
   variables?: ListQueryArgs<Post> & {
     where?: PostsWhereQueryInput
@@ -3506,25 +3513,40 @@ export type PostsPayload<S extends boolean | null | undefined | PostsArgs> =
       }
     : Post
 
-export type AuthorsPayload<S extends boolean | null | undefined | AuthorsArgs> =
-  S extends true
-    ? Author
-    : S extends undefined
-    ? never
-    : S extends { select: any } & AuthorsArgs
-    ? {
-        [P in TruthyKeys<S['select']>]: P extends 'posts'
-          ? Array<PostsPayload<S['select'][P]>>
-          : P extends keyof Author
-          ? Author[P]
-          : never
-      }
-    : Author
+export type AuthorsPayload<
+  S extends boolean | null | undefined | AuthorsArgs | AuthorsByPkArgs,
+> = S extends true
+  ? Author
+  : S extends undefined
+  ? never
+  : S extends { select: any } & AuthorsArgs
+  ? {
+      [P in TruthyKeys<S['select']>]: P extends 'posts'
+        ? Array<PostsPayload<S['select'][P]>>
+        : P extends keyof Author
+        ? Author[P]
+        : never
+    }
+  : S extends { select: any } & AuthorsByPkArgs
+  ? {
+      [P in TruthyKeys<S['select']>]: P extends 'posts'
+        ? Array<PostsPayload<S['select'][P]>>
+        : P extends keyof Author
+        ? Author[P]
+        : never
+    }
+  : Author
 
 export interface Query {
+  getAuthorsQueryString: <T extends AuthorsArgs>(
+    args?: SelectSubset<T, AuthorsArgs>,
+  ) => Promise<AuthorsPayload<T>[]>
   authors: <T extends AuthorsArgs>(
     args?: SelectSubset<T, AuthorsArgs>,
   ) => Promise<AuthorsPayload<T>[]>
+  authorsByPk: <T extends AuthorsByPkArgs>(
+    args?: SelectSubset<T, AuthorsByPkArgs>,
+  ) => Promise<AuthorsPayload<T>>
   posts: <T extends PostsArgs>(
     args?: SelectSubset<T, PostsArgs>,
   ) => Promise<PostsPayload<T>[]>
