@@ -1,6 +1,6 @@
 import { parse, print } from 'graphql/language'
 import pascalCase from 'just-pascal-case'
-import { QueryParam } from '../../client/client.types'
+import type { OperationParam } from '../../client/client.types'
 import camelizeDotNotation from '../camelizeDotNotation'
 
 export interface GetGraphqlMutationStringOptions {
@@ -15,7 +15,7 @@ export interface GetGraphqlMutationStringOptions {
   /**
    * The mutation parameters.
    */
-  mutationParams?: QueryParam[]
+  mutationParams?: OperationParam[]
 }
 
 /**

@@ -45,7 +45,7 @@ export default function createMutationClient<TMutation extends object = any>(
           type: normalizeType(generatedMutations[mutationName]?.__type),
         }
 
-        const graphqlQuery = getGraphqlMutationString({
+        const graphqlMutation = getGraphqlMutationString({
           name: mutationName,
           mutationParams: getOperationParams({
             generatedSchema,
@@ -69,7 +69,7 @@ export default function createMutationClient<TMutation extends object = any>(
           }
 
           const { data, error } = await fetchQuery?.(
-            graphqlQuery,
+            graphqlMutation,
             getVariables({ args, field }),
             {
               useAxios: false,

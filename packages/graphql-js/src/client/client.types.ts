@@ -21,6 +21,7 @@ export interface SelectedFields
 export interface OperationArgs {
   variables?: Record<string, any>
   select?: SelectedFields
+  typedDocumentNode?: boolean
 }
 
 export interface OperationField {

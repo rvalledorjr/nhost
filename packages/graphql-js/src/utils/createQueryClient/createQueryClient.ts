@@ -1,4 +1,4 @@
-import { DocumentNode } from 'graphql'
+import { DocumentNode, parse } from 'graphql'
 import camelCase from 'just-camel-case'
 import type {
   BaseGeneratedSchema,
@@ -60,6 +60,10 @@ export default function createQueryClient<TQuery extends object = any>(
             operationType: 'query',
           }),
         })
+
+        if (args?.typedDocumentNode) {
+          return parse(graphqlQuery)
+        }
 
         return new Promise(async (resolve, reject) => {
           if (!fetchQuery) {
