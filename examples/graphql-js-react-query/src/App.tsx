@@ -1,10 +1,9 @@
 import { NhostProvider } from '@nhost/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 
 import Authors from './components/Authors'
 import { nhost } from './utils/nhost'
-
-const queryClient = new QueryClient()
+import { queryClient } from './utils/queryClient'
 
 function App() {
   return (

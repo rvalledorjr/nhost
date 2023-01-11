@@ -1,22 +1,22 @@
-import type { QueryArgs, QueryField } from '../../client/client.types'
+import type { OperationArgs, OperationField } from '../../client/client.types'
 import camelizeDotNotation from '../camelizeDotNotation'
 
 export interface GetVariablesOptions {
   /**
    * The query arguments.
    */
-  args?: QueryArgs
+  args?: OperationArgs
   /**
    * The field to get the variables for.
    */
-  field: QueryField
+  field: OperationField
   /**
    * The previous path.
    */
   previousPath?: string
 }
 
-function countFieldsWithVariables(args: QueryArgs) {
+function countFieldsWithVariables(args: OperationArgs): number {
   if (!args) {
     return 0
   }
@@ -26,9 +26,12 @@ function countFieldsWithVariables(args: QueryArgs) {
       return count + 1
     }
 
-    if (typeof args[key as keyof QueryArgs] === 'object') {
-      count += countFieldsWithVariables(
-        args[key as keyof QueryArgs] as QueryArgs,
+    if (typeof args[key as keyof OperationArgs] === 'object') {
+      return (
+        count +
+        countFieldsWithVariables(
+          args[key as keyof OperationArgs] as OperationArgs,
+        )
       )
     }
 
@@ -71,7 +74,7 @@ export default function getVariables({
   })
 
   const nestedVariables = selectedObjects.reduce((selectedVariables, key) => {
-    const nestedArguments = args.select![key] as QueryArgs
+    const nestedArguments = args.select![key] as OperationArgs
 
     return {
       ...selectedVariables,

@@ -1,15 +1,17 @@
 import { useNhostClient } from '@nhost/react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { FormEvent } from 'react'
-import type { Mutation, Query } from '../__generated__/nhost.generated'
+import { queryClient } from '../utils/queryClient'
+import type {
+  AuthorsPayload,
+  InsertAuthorsOneArgs,
+  Mutation,
+  Query
+} from '../__generated__/nhost.generated'
 
 export default function Authors() {
   const client = useNhostClient<Query, Mutation>()
-  const {
-    data: authors,
-    status,
-    refetch
-  } = useQuery(['authors'], () =>
+  const { data: authors, status } = useQuery(['authors'], () =>
     client.graphql.query.authors({
       select: {
         id: true,
@@ -29,9 +31,9 @@ export default function Authors() {
     mutateAsync,
     status: mutationStatus,
     error
-  } = useMutation((args: Parameters<typeof client.graphql.mutation.insertAuthorsOne>[0]) => {
-    return client.graphql.mutation.insertAuthorsOne(args)
-  })
+  } = useMutation<AuthorsPayload<InsertAuthorsOneArgs>, unknown, InsertAuthorsOneArgs>(
+    client.graphql.mutation.insertAuthorsOne
+  )
 
   if (status === 'loading') {
     return <span>Loading authors...</span>
@@ -50,7 +52,7 @@ export default function Authors() {
     const name = nameInput.value
     const age = parseInt(ageInput.value, 10)
 
-    await mutateAsync({
+    const insertedAuthor = await mutateAsync({
       variables: {
         object: {
           name,
@@ -62,7 +64,7 @@ export default function Authors() {
       }
     })
 
-    await refetch()
+    await queryClient.invalidateQueries(['authors'])
 
     event.target.reset()
     nameInput.focus()

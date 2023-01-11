@@ -3560,6 +3560,6 @@ export interface Query {
 
 export interface Mutation {
   insertAuthorsOne: <T extends InsertAuthorsOneArgs>(
-    args?: SelectSubset<T, InsertAuthorsOneArgs>
+    args: SelectSubset<T, InsertAuthorsOneArgs>
   ) => Promise<AuthorsPayload<T>>
 }
