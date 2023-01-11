@@ -1,0 +1,1 @@
+CREATE TABLE public.posts (id uuid DEFAULT gen_random_uuid() NOT NULL, title text NOT NULL, author_id uuid NOT NULL, PRIMARY KEY (id), FOREIGN KEY (author_id) REFERENCES public.authors (id) ON UPDATE RESTRICT ON DELETE RESTRICT);

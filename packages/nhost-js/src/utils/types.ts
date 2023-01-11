@@ -1,3 +1,4 @@
+import { NhostGraphqlConstructorParams } from '@nhost/graphql-js'
 import { NhostAuthConstructorParams } from '@nhost/hasura-auth-js'
 // TODO shared with other packages
 export type ErrorPayload = {
@@ -46,7 +47,8 @@ export interface NhostClientConstructorParams
   extends Partial<BackendUrl>,
     Partial<Subdomain>,
     Partial<ServiceUrls>,
-    Omit<NhostAuthConstructorParams, 'url'> {
+    Omit<NhostAuthConstructorParams, 'url'>,
+    Pick<NhostGraphqlConstructorParams, 'generatedSchema'> {
   /**
    * When set, the admin secret is sent as a header, `x-hasura-admin-secret`,
    * for all requests to GraphQL, Storage, and Serverless Functions.

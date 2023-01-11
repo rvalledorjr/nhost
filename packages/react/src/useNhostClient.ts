@@ -14,7 +14,10 @@ import { NhostReactContext } from './provider'
  *
  * @docs https://docs.nhost.io/reference/react/use-nhost-client
  */
-export const useNhostClient = (): NhostClient => {
-  const nhost = useContext(NhostReactContext)
+export const useNhostClient: <TQuery extends {} = any>() => NhostClient<TQuery> = <
+  TQuery extends {} = any
+>(): NhostClient<TQuery> => {
+  const nhost = useContext(NhostReactContext) as NhostClient<TQuery>
+
   return nhost
 }

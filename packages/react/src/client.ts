@@ -3,6 +3,7 @@ import {
   BackendUrl,
   NhostAuthConstructorParams,
   NhostClient as _VanillaNhostClient,
+  NhostGraphqlConstructorParams,
   NHOST_REFRESH_TOKEN_KEY,
   Subdomain
 } from '@nhost/nhost-js'
@@ -17,7 +18,8 @@ export const VanillaNhostClient = _VanillaNhostClient
 export interface NhostReactClientConstructorParams
   extends Partial<BackendUrl>,
     Partial<Subdomain>,
-    Omit<NhostAuthConstructorParams, 'url' | 'start' | 'client'> {}
+    Omit<NhostAuthConstructorParams, 'url' | 'start' | 'client'>,
+    Pick<NhostGraphqlConstructorParams, 'generatedSchema'> {}
 
 export class NhostClient extends VanillaNhostClient {
   constructor(params: NhostReactClientConstructorParams) {

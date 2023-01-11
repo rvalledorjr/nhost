@@ -1,17 +1,18 @@
+import { NhostGraphqlClient } from '@nhost/graphql-js'
 import { HasuraAuthClient } from '@nhost/hasura-auth-js'
 import { HasuraStorageClient } from '@nhost/hasura-storage-js'
 import { NhostClientConstructorParams } from '../utils/types'
 import { createAuthClient } from './auth'
 import { createFunctionsClient, NhostFunctionsClient } from './functions'
-import { createGraphqlClient, NhostGraphqlClient } from './graphql'
+import { createGraphqlClient } from './graphql'
 import { createStorageClient } from './storage'
 
 export const createNhostClient = (params: NhostClientConstructorParams) => new NhostClient(params)
-export class NhostClient {
+export class NhostClient<TQuery extends {} = any> {
   auth: HasuraAuthClient
   storage: HasuraStorageClient
   functions: NhostFunctionsClient
-  graphql: NhostGraphqlClient
+  graphql: NhostGraphqlClient<TQuery>
   private _adminSecret?: string
   readonly devTools?: boolean
 

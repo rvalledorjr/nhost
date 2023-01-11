@@ -63,6 +63,7 @@
     "docgen": "pnpm typedoc && docgen --config ./nhost-js.docgen.json"
   },
   "dependencies": {
+    "@nhost/graphql-js": "workspace:*",
     "@nhost/hasura-auth-js": "workspace:*",
     "@nhost/hasura-storage-js": "workspace:*",
     "axios": "^1.2.0",
