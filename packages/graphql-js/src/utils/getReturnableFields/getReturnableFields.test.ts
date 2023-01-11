@@ -38,6 +38,7 @@ test('should prepare return fields', () => {
           },
         },
       },
+      operationType: 'query',
     }),
   ).toBe(
     'authors(where: $authorsWhere, limit: $authorsLimit) { id posts(where: $authorsPostsWhere) { author { posts(where: $authorsPostsAuthorPostsWhere) { id } } } }',
