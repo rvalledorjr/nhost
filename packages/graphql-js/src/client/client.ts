@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 import { DocumentNode, GraphQLError, print } from 'graphql'
+import createMutationClient from '../utils/createMutationClient'
 import createQueryClient from '../utils/createQueryClient'
 import type {
   DeprecatedNhostGraphqlRequestResponse,
@@ -39,7 +40,12 @@ export class NhostGraphqlClient<
       params.generatedSchema,
       this.request.bind(this),
     )
-    this.mutation = {} as GeneratedMutation
+
+    this.mutation = createMutationClient<GeneratedMutation>(
+      params.generatedSchema,
+      this.request.bind(this),
+    )
+
     this.subscription = {} as GeneratedSubscription
   }
 

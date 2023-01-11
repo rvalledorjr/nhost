@@ -8,24 +8,27 @@ export interface ErrorPayload {
 
 export interface BaseGeneratedSchema extends Record<string, any> {
   query: Record<string, { __type: string; __args?: Record<string, string> }>
-  mutation: object
-  subscription: object
+  mutation: Record<string, { __type: string; __args?: Record<string, string> }>
+  subscription: Record<
+    string,
+    { __type: string; __args?: Record<string, string> }
+  >
 }
 
 export interface SelectedFields
-  extends Record<string, boolean | QueryArgs | SelectedFields> {}
+  extends Record<string, boolean | OperationArgs | SelectedFields> {}
 
-export interface QueryArgs {
+export interface OperationArgs {
   variables?: Record<string, any>
   select?: SelectedFields
 }
 
-export interface QueryField {
+export interface OperationField {
   name: string
   type: string
 }
 
-export interface QueryParam {
+export interface OperationParam {
   name: string
   path: string
   type?: string

@@ -1,10 +1,10 @@
 import { expect, test } from 'vitest'
 import { generatedSchema } from '../../testUtils/nhost.generated'
-import getQueryParams from './getQueryParams'
+import getOperationParams from './getOperationParams'
 
 test('should generate proper query parameters', () => {
   expect(
-    getQueryParams({
+    getOperationParams({
       generatedSchema,
       field: { name: 'authors', type: 'authors_bool_exp' },
       args: {
@@ -32,6 +32,7 @@ test('should generate proper query parameters', () => {
           },
         },
       },
+      operationType: 'query',
     }),
   ).toStrictEqual([
     {

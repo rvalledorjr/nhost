@@ -1,11 +1,11 @@
 import type {
   BaseGeneratedSchema,
-  QueryArgs,
-  QueryField,
-  QueryParam,
+  OperationArgs,
+  OperationField,
+  OperationParam,
 } from '../../client/client.types'
 import camelizeDotNotation from '../camelizeDotNotation'
-import getQueryParams from '../getQueryParams'
+import getOperationParams from '../getOperationParams'
 import normalizeType from '../normalizeType'
 
 export interface GetReturnableFieldsOptions {
@@ -16,11 +16,15 @@ export interface GetReturnableFieldsOptions {
   /**
    * The field to get the return fields for.
    */
-  field: QueryField
+  field: OperationField
+  /**
+   * Type of the operation.
+   */
+  operationType: 'query' | 'mutation'
   /**
    * The query arguments.
    */
-  args?: QueryArgs
+  args?: OperationArgs
   /**
    * The previous field that was used to get the return fields for.
    *
@@ -33,7 +37,7 @@ export interface GetReturnableFieldsOptions {
    *
    * @internal
    */
-  previousQueryParams?: QueryParam[]
+  previousOperationParams?: OperationParam[]
 }
 
 /**
@@ -48,13 +52,15 @@ export default function getReturnableFields({
   field,
   args,
   previousPath = '',
-  previousQueryParams,
+  previousOperationParams,
+  operationType,
 }: GetReturnableFieldsOptions): string {
   const generatedFields = generatedSchema[field.type]
-  const queryParams =
-    previousQueryParams || getQueryParams({ generatedSchema, args, field })
+  const OperationParams =
+    previousOperationParams ||
+    getOperationParams({ generatedSchema, args, field, operationType })
 
-  const currentQueryParams = queryParams?.filter(({ path }) => {
+  const currentOperationParams = OperationParams?.filter(({ path }) => {
     if (previousPath) {
       return path === `${previousPath}.${field.name}`
     }
@@ -86,8 +92,8 @@ export default function getReturnableFields({
       }
     },
     {
-      scalar: [] as QueryField[],
-      nonScalar: [] as QueryField[],
+      scalar: [] as OperationField[],
+      nonScalar: [] as OperationField[],
     },
   )
 
@@ -99,21 +105,22 @@ export default function getReturnableFields({
           getReturnableFields({
             generatedSchema,
             field: nonScalarField,
-            args: args.select?.[nonScalarField.name] as QueryArgs,
+            args: args.select?.[nonScalarField.name] as OperationArgs,
+            operationType,
             previousPath: previousPath
               ? `${previousPath}.${field.name}`
               : field.name,
-            previousQueryParams: queryParams,
+            previousOperationParams: OperationParams,
           }),
         ),
       ]
 
   // We are not manipulating the name of the variable if we have all
   // the query params passed to the current field.
-  if (currentQueryParams.length === queryParams.length) {
+  if (currentOperationParams.length === OperationParams.length) {
     return `${field.name}${
-      currentQueryParams.length > 0
-        ? `(${currentQueryParams
+      currentOperationParams.length > 0
+        ? `(${currentOperationParams
             .map(({ name }) => `${name}: $${name}`)
             .join(', ')})`
         : ''
@@ -125,8 +132,8 @@ export default function getReturnableFields({
   // a `where` variable, we need to rename the `where` variable to
   // `authorsWhere` and `authorsPostsWhere`.
   return `${field.name}${
-    currentQueryParams.length > 0
-      ? `(${currentQueryParams
+    currentOperationParams.length > 0
+      ? `(${currentOperationParams
           .map(
             ({ name, path }) => `${name}: $${camelizeDotNotation(path, name)}`,
           )

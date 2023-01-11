@@ -8,11 +8,11 @@ import { createGraphqlClient } from './graphql'
 import { createStorageClient } from './storage'
 
 export const createNhostClient = (params: NhostClientConstructorParams) => new NhostClient(params)
-export class NhostClient<TQuery extends {} = any> {
+export class NhostClient<TQuery extends {} = any, TMutation extends {} = any> {
   auth: HasuraAuthClient
   storage: HasuraStorageClient
   functions: NhostFunctionsClient
-  graphql: NhostGraphqlClient<TQuery>
+  graphql: NhostGraphqlClient<TQuery, TMutation>
   private _adminSecret?: string
   readonly devTools?: boolean
 

@@ -3447,6 +3447,26 @@ export interface PostsWhereQueryInput {
   author_id?: general_comparison_exp<Scalars['uuid']>
 }
 
+// Insert inputs
+
+export interface PostsInsertInput {
+  id?: Maybe<Scalars['uuid']>
+  title: Scalars['String']
+  author_id: Scalars['uuid']
+  author?: Maybe<AuthorsInsertInput>
+}
+
+export interface PostsArrRelInsertInput {
+  data: PostsInsertInput[]
+}
+
+export interface AuthorsInsertInput {
+  id?: Maybe<Scalars['uuid']>
+  name: Scalars['String']
+  age: Scalars['Int']
+  posts?: Maybe<PostsInsertInput>
+}
+
 // Select inputs
 
 export interface AuthorSelect {
@@ -3484,6 +3504,14 @@ export interface AuthorsArgs {
   select?: AuthorsSelect
 }
 
+export interface InsertAuthorsOneArgs {
+  variables: {
+    object: AuthorsInsertInput
+    on_conflict?: any
+  }
+  select?: AuthorsSelect
+}
+
 export interface AuthorsByPkArgs {
   variables?: {
     id: Scalars['uuid']
@@ -3514,20 +3542,22 @@ export type PostsPayload<S extends boolean | null | undefined | PostsArgs> =
     : Post
 
 export type AuthorsPayload<
-  S extends boolean | null | undefined | AuthorsArgs | AuthorsByPkArgs,
+  S extends
+    | boolean
+    | null
+    | undefined
+    | AuthorsArgs
+    | InsertAuthorsOneArgs
+    | AuthorsByPkArgs,
 > = S extends true
   ? Author
   : S extends undefined
   ? never
-  : S extends { select: any } & AuthorsArgs
-  ? {
-      [P in TruthyKeys<S['select']>]: P extends 'posts'
-        ? Array<PostsPayload<S['select'][P]>>
-        : P extends keyof Author
-        ? Author[P]
-        : never
-    }
-  : S extends { select: any } & AuthorsByPkArgs
+  : S extends { select: any } & (
+      | AuthorsByPkArgs
+      | AuthorsArgs
+      | InsertAuthorsOneArgs
+    )
   ? {
       [P in TruthyKeys<S['select']>]: P extends 'posts'
         ? Array<PostsPayload<S['select'][P]>>
@@ -3538,9 +3568,6 @@ export type AuthorsPayload<
   : Author
 
 export interface Query {
-  getAuthorsQueryString: <T extends AuthorsArgs>(
-    args?: SelectSubset<T, AuthorsArgs>,
-  ) => Promise<AuthorsPayload<T>[]>
   authors: <T extends AuthorsArgs>(
     args?: SelectSubset<T, AuthorsArgs>,
   ) => Promise<AuthorsPayload<T>[]>
@@ -3550,4 +3577,10 @@ export interface Query {
   posts: <T extends PostsArgs>(
     args?: SelectSubset<T, PostsArgs>,
   ) => Promise<PostsPayload<T>[]>
+}
+
+export interface Mutation {
+  insertAuthorsOne: <T extends InsertAuthorsOneArgs>(
+    args?: SelectSubset<T, InsertAuthorsOneArgs>,
+  ) => Promise<AuthorsPayload<T>>
 }

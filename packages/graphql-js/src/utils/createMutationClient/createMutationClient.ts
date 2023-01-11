@@ -7,7 +7,7 @@ import type {
   OperationArgs,
   OperationField,
 } from '../../client/client.types'
-import getGraphqlQueryString from '../getGraphqlQueryString'
+import getGraphqlMutationString from '../getGraphqlMutationString'
 import getOperationParams from '../getOperationParams'
 import getReturnableFields from '../getReturnableFields'
 import getVariables from '../getVariables'
@@ -20,44 +20,44 @@ export type FetchFunction = <T = any, V = any>(
 ) => Promise<NhostGraphqlRequestResponse<T>>
 
 /**
- * Creates a query client from a generated schema.
+ * Creates a mutation client from a generated schema.
  *
  * @param generatedSchema - The generated schema.
  * @param fetchQuery - Function to use for fetching data.
- * @returns A query client.
+ * @returns A mutation client.
  */
-export default function createQueryClient<TQuery extends object = any>(
+export default function createMutationClient<TMutation extends object = any>(
   generatedSchema?: BaseGeneratedSchema,
   fetchQuery?: FetchFunction,
 ) {
   if (!generatedSchema) {
-    return {} as TQuery
+    return {} as TMutation
   }
 
-  const { query: generatedQueries } = generatedSchema
+  const { mutation: generatedMutations } = generatedSchema
 
-  return Object.keys(generatedQueries).reduce(
-    (queryClient, queryName) => ({
+  return Object.keys(generatedMutations).reduce(
+    (queryClient, mutationName) => ({
       ...queryClient,
-      [camelCase(queryName)]: (args?: OperationArgs) => {
+      [camelCase(mutationName)]: (args?: OperationArgs) => {
         const field: OperationField = {
-          name: queryName,
-          type: normalizeType(generatedQueries[queryName]?.__type),
+          name: mutationName,
+          type: normalizeType(generatedMutations[mutationName]?.__type),
         }
 
-        const graphqlQuery = getGraphqlQueryString({
-          name: queryName,
-          queryParams: getOperationParams({
+        const graphqlQuery = getGraphqlMutationString({
+          name: mutationName,
+          mutationParams: getOperationParams({
             generatedSchema,
             args,
             field,
-            operationType: 'query',
+            operationType: 'mutation',
           }),
           returnableFields: getReturnableFields({
             generatedSchema,
             args,
             field,
-            operationType: 'query',
+            operationType: 'mutation',
           }),
         })
 
@@ -82,10 +82,10 @@ export default function createQueryClient<TQuery extends object = any>(
             return
           }
 
-          resolve(data?.[queryName])
+          resolve(data?.[mutationName])
         })
       },
     }),
-    {} as TQuery,
+    {} as TMutation,
   )
 }

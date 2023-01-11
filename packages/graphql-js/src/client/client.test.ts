@@ -2,7 +2,11 @@ import { graphql } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, beforeAll, beforeEach, expect, test } from 'vitest'
 import { authors as mockAuthors } from '../testUtils/msw/__mocks__/authors'
-import { generatedSchema, type Query } from '../testUtils/nhost.generated'
+import {
+  generatedSchema,
+  type Mutation,
+  type Query,
+} from '../testUtils/nhost.generated'
 import { NhostGraphqlClient } from './client'
 
 const mockLink = graphql.link('http://localhost:1337/v1/graphql')
@@ -16,7 +20,7 @@ const server = setupServer(
   ),
 )
 
-const client = new NhostGraphqlClient<Query>({
+const client = new NhostGraphqlClient<Query, Mutation>({
   url: 'http://localhost:1337/v1/graphql',
   adminSecret: 'nhost-admin-secret',
   generatedSchema,
@@ -112,5 +116,38 @@ test('should return a single author by its primary key', async () => {
     age: 27,
     id: '6ac21ac1-5eaa-4326-9382-7451b06906e2',
     name: 'Jane Doe',
+  })
+})
+
+test('should be able to execute a mutation', async () => {
+  server.use(
+    mockLink.mutation('InsertAuthorsOne', (req, res, ctx) => {
+      return res(
+        ctx.data({
+          insert_authors_one: {
+            __typename: 'authors',
+            id: '6ac21ac1-5eaa-4326-9382-7451b06906e2',
+            age: req.variables?.object?.age,
+            name: req.variables?.object?.name,
+          },
+        }),
+      )
+    }),
+  )
+
+  const author = await client.mutation.insertAuthorsOne({
+    variables: {
+      object: {
+        name: 'Christian Smith',
+        age: 27,
+      },
+    },
+  })
+
+  expect(author).toMatchObject({
+    __typename: 'authors',
+    id: '6ac21ac1-5eaa-4326-9382-7451b06906e2',
+    age: 27,
+    name: 'Christian Smith',
   })
 })
