@@ -1,25 +1,25 @@
-import { useNhostClient } from '@nhost/react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { FormEvent } from 'react'
 import { queryClient } from '../utils/queryClient'
-import type { Mutation, Query } from '../__generated__/nhost.generated'
+import useNhostClient from '../utils/useNhostClient'
+import CreateAuthorForm, { CreateAuthorFormValues } from './CreateAuthorForm'
 
 function useInsertAuthorsOneMutation() {
-  const client = useNhostClient<Query, Mutation>()
+  const client = useNhostClient()
   const mutation = useMutation(
     (args: Parameters<typeof client.graphql.mutation.insertAuthorsOne>[0]) =>
       client.graphql.mutation.insertAuthorsOne(args)
   )
 
+  // Note: This is a temporary workaround to allow dynamic typing for the
+  // mutateAsync function
   return {
     ...mutation,
-    mutate: mutation.mutate,
     mutateAsync: mutation.mutateAsync as typeof client.graphql.mutation.insertAuthorsOne
   }
 }
 
 export default function Authors() {
-  const client = useNhostClient<Query, Mutation>()
+  const client = useNhostClient()
   const { data: authors, status } = useQuery(['authors'], () =>
     client.graphql.query.authors({
       select: {
@@ -42,19 +42,11 @@ export default function Authors() {
     return <span>Loading authors...</span>
   }
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
+  if (status === 'error') {
+    return <span>Authors could not be fetched.</span>
+  }
 
-    if (!(event.target instanceof HTMLFormElement)) {
-      return
-    }
-
-    const nameInput = event.target.children.namedItem('name') as HTMLInputElement
-    const ageInput = event.target.children.namedItem('age') as HTMLInputElement
-
-    const name = nameInput.value
-    const age = parseInt(ageInput.value, 10)
-
+  async function handleSubmit({ name, age }: CreateAuthorFormValues) {
     await mutateAsync({
       variables: {
         object: {
@@ -68,19 +60,11 @@ export default function Authors() {
     })
 
     await queryClient.invalidateQueries(['authors'])
-
-    event.target.reset()
-    nameInput.focus()
   }
 
   return (
     <div className="font-sans">
-      <form onSubmit={handleSubmit}>
-        <input id="name" name="name" placeholder="Name" aria-label="Name" />
-        <input id="age" name="age" placeholder="Age" aria-label="Age" type="number" />
-
-        <button type="submit">Add</button>
-      </form>
+      <CreateAuthorForm onSubmit={handleSubmit} />
 
       {mutationStatus === 'loading' && <span>Adding author...</span>}
       {mutationStatus === 'error' && (
@@ -91,7 +75,7 @@ export default function Authors() {
         {authors?.map((author) => (
           <li key={author.id}>
             {author.name} (Age: {author.age})<br />
-            {author.posts.length === 0 && <span>No posts are available for this author.</span>}
+            {author.posts.length === 0 && <span>This author doesn&apos;t have any posts.</span>}
             {author.posts.length > 0 && (
               <ul>
                 {author.posts.map((post) => (

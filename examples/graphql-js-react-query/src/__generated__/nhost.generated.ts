@@ -1,3 +1,5 @@
+import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
+
 // This object will be generated based on the introspection results
 
 export const generatedSchema = {
@@ -3428,6 +3430,7 @@ export interface AuthorsWhereQueryInput {
   name?: String_comparison_exp
   age?: general_comparison_exp<Scalars['Int']>
   posts?: PostsWhereQueryInput
+  posts_aggregate?: PostsAggregateWhereQueryInput
 }
 
 export interface PostsWhereQueryInput {
@@ -3437,6 +3440,17 @@ export interface PostsWhereQueryInput {
   id?: general_comparison_exp<Scalars['uuid']>
   title?: String_comparison_exp
   author_id?: general_comparison_exp<Scalars['uuid']>
+}
+
+export interface PostsAggregateBoolExpCountInput {
+  arguments?: PostsSelect
+  distinct?: boolean
+  filter?: PostsWhereQueryInput
+  predicate?: general_comparison_exp<Scalars['Int']>
+}
+
+export interface PostsAggregateWhereQueryInput {
+  count?: PostsAggregateBoolExpCountInput
 }
 
 // Insert inputs
@@ -3485,6 +3499,8 @@ export interface PostsSelect {
   author?: boolean | AuthorArgs
 }
 
+// Arguments
+
 export interface AuthorArgs {
   select?: AuthorSelect
 }
@@ -3494,14 +3510,16 @@ export interface AuthorsArgs {
     where?: AuthorsWhereQueryInput
   }
   select?: AuthorsSelect
+  typedDocumentNode?: boolean
 }
 
 export interface InsertAuthorsOneArgs {
   variables: {
     object: AuthorsInsertInput
-    on_conflict?: any
+    // TODO: extend with on_conflict
   }
   select?: AuthorsSelect
+  typedDocumentNode?: boolean
 }
 
 export interface AuthorsByPkArgs {
@@ -3509,6 +3527,7 @@ export interface AuthorsByPkArgs {
     id: Scalars['uuid']
   }
   select?: AuthorsSelect
+  typedDocumentNode?: boolean
 }
 
 export interface PostsArgs {
@@ -3516,7 +3535,68 @@ export interface PostsArgs {
     where?: PostsWhereQueryInput
   }
   select?: PostsSelect
+  typedDocumentNode?: boolean
 }
+
+// Documents
+
+export type AuthorsDocument<
+  TAuthor extends Author | Author[],
+  S extends boolean | null | undefined | AuthorsArgs | InsertAuthorsOneArgs | AuthorsByPkArgs
+> = S extends { select: any }
+  ? TypedDocumentNode<
+      TAuthor extends Author[]
+        ? {
+            authors: {
+              [P in TruthyKeys<S['select']>]: P extends 'posts'
+                ? Array<PostsPayload<S['select'][P]>>
+                : P extends keyof Author
+                ? Author[P]
+                : never
+            }[]
+          }
+        : {
+            author: {
+              [P in TruthyKeys<S['select']>]: P extends 'posts'
+                ? Array<PostsPayload<S['select'][P]>>
+                : P extends keyof Author
+                ? Author[P]
+                : never
+            }
+          },
+      AuthorsArgs
+    >
+  : TypedDocumentNode<TAuthor, AuthorsArgs>
+
+export type PostsDocument<
+  TPost extends Post | Post[],
+  S extends boolean | null | undefined | PostsArgs
+> = S extends { select: any }
+  ? TypedDocumentNode<
+      TPost extends Post[]
+        ? {
+            posts: {
+              [P in TruthyKeys<S['select']>]: P extends 'author'
+                ? AuthorsPayload<S['select'][P]>
+                : P extends keyof Post
+                ? Post[P]
+                : never
+            }[]
+          }
+        : {
+            post: {
+              [P in TruthyKeys<S['select']>]: P extends 'author'
+                ? AuthorsPayload<S['select'][P]>
+                : P extends keyof Post
+                ? Post[P]
+                : never
+            }
+          },
+      PostsArgs
+    >
+  : TypedDocumentNode<TPost, PostsArgs>
+
+// Payloads
 
 export type PostsPayload<S extends boolean | null | undefined | PostsArgs> = S extends true
   ? Post
@@ -3548,18 +3628,28 @@ export type AuthorsPayload<
     }
   : Author
 
+// Query, Mutation and Subscription interfaces
+
 export interface Query {
   authors: <T extends AuthorsArgs>(
     args?: SelectSubset<T, AuthorsArgs>
-  ) => Promise<AuthorsPayload<T>[]>
+  ) => T extends { typedDocumentNode: true }
+    ? AuthorsDocument<Author[], T>
+    : Promise<AuthorsPayload<T>[]>
   authorsByPk: <T extends AuthorsByPkArgs>(
     args?: SelectSubset<T, AuthorsByPkArgs>
-  ) => Promise<AuthorsPayload<T>>
-  posts: <T extends PostsArgs>(args?: SelectSubset<T, PostsArgs>) => Promise<PostsPayload<T>[]>
+  ) => T extends { typedDocumentNode: true }
+    ? AuthorsDocument<Author, T>
+    : Promise<AuthorsPayload<T>>
+  posts: <T extends PostsArgs>(
+    args?: SelectSubset<T, PostsArgs>
+  ) => T extends { typedDocumentNode: true } ? PostsDocument<Post[], T> : Promise<PostsPayload<T>[]>
 }
 
 export interface Mutation {
   insertAuthorsOne: <T extends InsertAuthorsOneArgs>(
-    args: SelectSubset<T, InsertAuthorsOneArgs>
-  ) => Promise<AuthorsPayload<T>>
+    args?: SelectSubset<T, InsertAuthorsOneArgs>
+  ) => T extends { typedDocumentNode: true }
+    ? AuthorsDocument<Author, T>
+    : Promise<AuthorsPayload<T>>
 }

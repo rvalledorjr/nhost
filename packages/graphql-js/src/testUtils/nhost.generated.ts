@@ -3438,6 +3438,7 @@ export interface AuthorsWhereQueryInput {
   name?: String_comparison_exp
   age?: general_comparison_exp<Scalars['Int']>
   posts?: PostsWhereQueryInput
+  posts_aggregate?: PostsAggregateWhereQueryInput
 }
 
 export interface PostsWhereQueryInput {
@@ -3447,6 +3448,17 @@ export interface PostsWhereQueryInput {
   id?: general_comparison_exp<Scalars['uuid']>
   title?: String_comparison_exp
   author_id?: general_comparison_exp<Scalars['uuid']>
+}
+
+export interface PostsAggregateBoolExpCountInput {
+  arguments?: PostsSelect
+  distinct?: boolean
+  filter?: PostsWhereQueryInput
+  predicate?: general_comparison_exp<Scalars['Int']>
+}
+
+export interface PostsAggregateWhereQueryInput {
+  count?: PostsAggregateBoolExpCountInput
 }
 
 // Insert inputs
@@ -3547,13 +3559,21 @@ export type AuthorsDocument<
     | AuthorsByPkArgs,
 > = S extends { select: any }
   ? TypedDocumentNode<
-      {
-        [P in TruthyKeys<S['select']>]: P extends 'posts'
-          ? Array<PostsPayload<S['select'][P]>>
-          : P extends keyof Author
-          ? Author[P]
-          : never
-      },
+      TAuthor extends Author[]
+        ? {
+            [P in TruthyKeys<S['select']>]: P extends 'posts'
+              ? Array<PostsPayload<S['select'][P]>>
+              : P extends keyof Author
+              ? Author[P]
+              : never
+          }[]
+        : {
+            [P in TruthyKeys<S['select']>]: P extends 'posts'
+              ? Array<PostsPayload<S['select'][P]>>
+              : P extends keyof Author
+              ? Author[P]
+              : never
+          },
       AuthorsArgs
     >
   : TypedDocumentNode<TAuthor, AuthorsArgs>
@@ -3563,13 +3583,21 @@ export type PostsDocument<
   S extends boolean | null | undefined | PostsArgs,
 > = S extends { select: any }
   ? TypedDocumentNode<
-      {
-        [P in TruthyKeys<S['select']>]: P extends 'author'
-          ? AuthorsPayload<S['select'][P]>
-          : P extends keyof Post
-          ? Post[P]
-          : never
-      },
+      TPost extends Post[]
+        ? {
+            [P in TruthyKeys<S['select']>]: P extends 'author'
+              ? AuthorsPayload<S['select'][P]>
+              : P extends keyof Post
+              ? Post[P]
+              : never
+          }[]
+        : {
+            [P in TruthyKeys<S['select']>]: P extends 'author'
+              ? AuthorsPayload<S['select'][P]>
+              : P extends keyof Post
+              ? Post[P]
+              : never
+          },
       PostsArgs
     >
   : TypedDocumentNode<TPost, PostsArgs>
