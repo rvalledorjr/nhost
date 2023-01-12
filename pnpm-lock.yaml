@@ -447,9 +447,6 @@ importers:
     devDependencies:
       cross-fetch: 3.1.5
 
-  examples/docker-compose/functions:
-    specifiers: {}
-
   examples/graphql-js-react-query:
     specifiers:
       '@nhost/react': '*'
@@ -12470,7 +12467,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.19.6_@babel+core@7.20.5
       magic-string: 0.27.0
       react-refresh: 0.14.0
-      vite: 4.0.2_@types+node@16.18.11
+      vite: 4.0.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -30616,40 +30613,6 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
 
-  /vite/4.0.3_@types+node@18.11.17:
-    resolution: {integrity: sha512-HvuNv1RdE7deIfQb8mPk51UKjqptO/4RXZ5yXSAvurd5xOckwS/gg8h9Tky3uSbnjYTgUm0hVCet1cyhKd73ZA==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      '@types/node': 18.11.17
-      esbuild: 0.16.10
-      postcss: 8.4.20
-      resolve: 1.22.1
-      rollup: 3.7.5
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
   /vite/4.0.4_@types+node@16.18.11:
     resolution: {integrity: sha512-xevPU7M8FU0i/80DMR+YhgrzR5KS2ORy1B4xcX/cXLsvnUWvfHuqMmVU6N0YiJ4JWGRJJsLCgjEzKjG9/GKoSw==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -30835,7 +30798,7 @@ packages:
       tinybench: 2.3.1
       tinypool: 0.3.0
       tinyspy: 1.0.2
-      vite: 4.0.3_@types+node@18.11.17
+      vite: 4.0.4_@types+node@18.11.17
       vite-node: 0.26.0_@types+node@18.11.17
     transitivePeerDependencies:
       - less
@@ -30928,7 +30891,7 @@ packages:
       tinybench: 2.3.1
       tinypool: 0.3.0
       tinyspy: 1.0.2
-      vite: 4.0.3_@types+node@18.11.17
+      vite: 4.0.4_@types+node@18.11.17
       vite-node: 0.26.2_@types+node@18.11.17
     transitivePeerDependencies:
       - less
