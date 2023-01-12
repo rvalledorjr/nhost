@@ -6,14 +6,18 @@ import Status, { StatusEnum } from '@/ui/Status';
 import type { DeploymentStatus } from '@/ui/StatusCircle';
 import { StatusCircle } from '@/ui/StatusCircle';
 import Button from '@/ui/v2/Button';
+import { Dropdown } from '@/ui/v2/Dropdown';
+import IconButton from '@/ui/v2/IconButton';
 import ArrowCounterclockwiseIcon from '@/ui/v2/icons/ArrowCounterclockwiseIcon';
-import ChevronRightIcon from '@/ui/v2/icons/ChevronRightIcon';
+import DotsHorizontalIcon from '@/ui/v2/icons/DotsHorizontalIcon';
 import { ListItem } from '@/ui/v2/ListItem';
 import Tooltip from '@/ui/v2/Tooltip';
 import { toastStyleProps } from '@/utils/settings/settingsConstants';
 import type { DeploymentRowFragment } from '@/utils/__generated__/graphql';
 import { useInsertDeploymentMutation } from '@/utils/__generated__/graphql';
 import { formatDistanceToNowStrict, parseISO } from 'date-fns';
+import { useRouter } from 'next/router';
+import type { MouseEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import { twMerge } from 'tailwind-merge';
 
@@ -43,6 +47,7 @@ export default function DeploymentListItem({
   showRedeploy,
   disableRedeploy,
 }: DeploymentListItemProps) {
+  const router = useRouter();
   const { currentWorkspace, currentApplication } =
     useCurrentWorkspaceAndApplication();
 
@@ -59,8 +64,74 @@ export default function DeploymentListItem({
   const [insertDeployment, { loading }] = useInsertDeploymentMutation();
   const { commitMessage } = deployment;
 
+  async function handleRedeployment(event: MouseEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const insertDeploymentPromise = insertDeployment({
+      variables: {
+        object: {
+          appId: currentApplication?.id,
+          commitMessage: deployment.commitMessage,
+          commitSHA: deployment.commitSHA,
+          commitUserAvatarUrl: deployment.commitUserAvatarUrl,
+          commitUserName: deployment.commitUserName,
+          deploymentStatus: 'SCHEDULED',
+        },
+      },
+    });
+
+    await toast.promise(
+      insertDeploymentPromise,
+      {
+        loading: 'Scheduling deployment...',
+        success: 'Deployment has been scheduled successfully.',
+        error: 'An error occurred when scheduling deployment.',
+      },
+      toastStyleProps,
+    );
+  }
+
   return (
-    <ListItem.Root>
+    <ListItem.Root
+      secondaryAction={
+        <Dropdown.Root id="deployment-management-menu">
+          <Dropdown.Trigger asChild hideChevron>
+            <IconButton variant="borderless" color="secondary">
+              <DotsHorizontalIcon />
+            </IconButton>
+          </Dropdown.Trigger>
+
+          <Dropdown.Content
+            menu
+            PaperProps={{ className: 'w-52' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          >
+            <Dropdown.Item
+              onClick={() =>
+                router.push(
+                  `/${currentWorkspace.slug}/${currentApplication.slug}/deployments/${deployment.id}`,
+                )
+              }
+            >
+              <span>View Deployment Details</span>
+            </Dropdown.Item>
+
+            <Dropdown.Item>
+              <ArrowCounterclockwiseIcon
+                className={twMerge(
+                  'w-4 h-4',
+                  disableRedeploy && 'animate-spin-reverse',
+                )}
+              />
+
+              <span>Redeploy</span>
+            </Dropdown.Item>
+          </Dropdown.Content>
+        </Dropdown.Root>
+      }
+    >
       <ListItem.Button
         className="grid grid-flow-col items-center justify-between gap-2 px-2 py-2"
         component={NavLink}
@@ -99,33 +170,7 @@ export default function DeploymentListItem({
                 size="small"
                 color="secondary"
                 variant="outlined"
-                onClick={async (event) => {
-                  event.stopPropagation();
-                  event.preventDefault();
-
-                  const insertDeploymentPromise = insertDeployment({
-                    variables: {
-                      object: {
-                        appId: currentApplication?.id,
-                        commitMessage: deployment.commitMessage,
-                        commitSHA: deployment.commitSHA,
-                        commitUserAvatarUrl: deployment.commitUserAvatarUrl,
-                        commitUserName: deployment.commitUserName,
-                        deploymentStatus: 'SCHEDULED',
-                      },
-                    },
-                  });
-
-                  await toast.promise(
-                    insertDeploymentPromise,
-                    {
-                      loading: 'Scheduling deployment...',
-                      success: 'Deployment has been scheduled successfully.',
-                      error: 'An error occurred when scheduling deployment.',
-                    },
-                    toastStyleProps,
-                  );
-                }}
+                onClick={handleRedeployment}
                 startIcon={
                   <ArrowCounterclockwiseIcon
                     className={twMerge(
@@ -163,8 +208,6 @@ export default function DeploymentListItem({
           <StatusCircle
             status={deployment.deploymentStatus as DeploymentStatus}
           />
-
-          <ChevronRightIcon className="h-4 w-4" />
         </div>
       </ListItem.Button>
     </ListItem.Root>

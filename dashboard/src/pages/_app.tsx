@@ -55,11 +55,12 @@ function MyApp({
 }: MyAppProps) {
   const isPlatform = useIsPlatform();
   const router = useRouter();
+  const analyticsWriteKey = process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY;
 
   // segment snippet
   function renderSnippet() {
     const opts = {
-      apiKey: process.env.NEXT_PUBLIC_ANALYTICS_WRITE_KEY,
+      apiKey: analyticsWriteKey,
       page: true,
     };
 
@@ -100,7 +101,7 @@ function MyApp({
                   <ManagedUIContext>
                     <Toaster position="bottom-center" />
 
-                    {isPlatform && (
+                    {isPlatform && analyticsWriteKey && (
                       <Script
                         id="segment"
                         dangerouslySetInnerHTML={{ __html: renderSnippet() }}

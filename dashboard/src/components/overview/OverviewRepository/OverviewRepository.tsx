@@ -34,12 +34,14 @@ export default function OverviewRepository() {
           </Button>
         </div>
       ) : (
-        <div className="mt-6 flex flex-row place-content-between rounded-lg bg-card py-1 px-2">
-          <div className="ml-2 flex flex-row">
-            <GithubIcon className="mr-1.5 h-4 w-4 self-center text-black" />
+        <div className="mt-6 grid grid-flow-col gap-1 place-content-between rounded-lg bg-card py-1 px-2">
+          <div className="grid grid-flow-col gap-2">
+            <GithubIcon className="h-4 w-4 self-center text-black" />
+
             <Text
               variant="body1"
-              className="self-center font-normal text-black"
+              component="span"
+              className="self-center font-normal text-black truncate"
             >
               {currentApplication.githubRepository.fullName}
             </Text>

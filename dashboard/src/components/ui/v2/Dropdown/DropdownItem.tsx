@@ -22,9 +22,16 @@ export interface DropdownItemProps extends MaterialMenuItemProps {
 }
 
 const StyledDropdownItem = styled(MaterialMenuItem)(({ theme }) => ({
+  display: 'grid',
+  gridAutoFlow: 'column',
+  gap: theme.spacing(),
+  alignItems: 'center',
   padding: theme.spacing(0.75, 1),
   transition: theme.transitions.create(['background-color', 'color']),
   width: '100%',
+  fontSize: theme.typography.pxToRem(15),
+  lineHeight: theme.typography.pxToRem(22),
+  fontWeight: theme.typography.fontWeightMedium,
   [`&.${buttonBaseClasses.root}+.${dividerClasses.root}`]: {
     margin: theme.spacing(0.5, 0),
   },
