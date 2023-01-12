@@ -998,9 +998,6 @@ importers:
       msw: 0.47.4
       start-server-and-test: 1.15.2
 
-  packages/hasura-auth-js/functions:
-    specifiers: {}
-
   packages/hasura-storage-js:
     specifiers:
       '@nhost/docgen': workspace:*
@@ -1023,9 +1020,6 @@ importers:
       pixelmatch: 5.3.0
       start-server-and-test: 1.15.2
       uuid: 9.0.0
-
-  packages/hasura-storage-js/functions:
-    specifiers: {}
 
   packages/nextjs:
     specifiers:
@@ -1072,9 +1066,6 @@ importers:
       '@nhost/docgen': link:../docgen
       graphql: 16.6.0
       start-server-and-test: 1.15.2
-
-  packages/nhost-js/functions:
-    specifiers: {}
 
   packages/react:
     specifiers:
