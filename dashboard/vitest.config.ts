@@ -10,5 +10,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: 'src/setupTests.ts',
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/e2e/**',
+      '**/tests-examples/**',
+      '**/.{idea,git,cache,output,temp}/**',
+    ],
   },
 });

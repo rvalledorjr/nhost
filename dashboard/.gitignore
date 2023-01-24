@@ -33,6 +33,7 @@ yarn-error.log*
 .env-development
 .env*
 !.env.example
+!.env.test
 .direnv
 .envrc
 
@@ -50,3 +51,6 @@ tailwind.json
 
 # Do not ignore Logs page
 !src/**/logs*
+/test-results/
+/playwright-report/
+/playwright/.cache/
