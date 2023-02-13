@@ -2,6 +2,7 @@ import {
   BackendUrl,
   NhostAuthConstructorParams,
   NhostClient as VanillaClient,
+  NhostGraphqlConstructorParams,
   removeParameterFromWindow,
   Subdomain
 } from '@nhost/nhost-js'
@@ -13,7 +14,8 @@ export type { BackendUrl, ErrorPayload, NhostSession, Subdomain, User } from '@n
 export interface NhostVueClientConstructorParams
   extends Partial<BackendUrl>,
     Partial<Subdomain>,
-    Omit<NhostAuthConstructorParams, 'url' | 'start' | 'client'> {}
+    Omit<NhostAuthConstructorParams, 'url' | 'start' | 'client'>,
+    Pick<NhostGraphqlConstructorParams, 'generatedSchema'> {}
 
 export class NhostClient extends VanillaClient {
   private autoSignIn: boolean

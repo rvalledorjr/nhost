@@ -13,18 +13,18 @@ import type {
  * @alias GraphQL
  */
 export class NhostGraphqlClient<
-  GeneratedQuery extends {} = any,
-  GeneratedMutation extends {} = any,
-  GeneratedSubscription extends {} = any,
+  Query extends {} = any,
+  Mutation extends {} = any,
+  Subscription extends {} = any,
 > {
   readonly url: string
   private instance: AxiosInstance
   private accessToken: string | null
   private adminSecret?: string
 
-  query: GeneratedQuery
-  mutation: GeneratedMutation
-  subscription: GeneratedSubscription
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
 
   constructor(params: NhostGraphqlConstructorParams) {
     const { url, adminSecret } = params
@@ -36,17 +36,17 @@ export class NhostGraphqlClient<
       baseURL: url,
     })
 
-    this.query = createQueryClient<GeneratedQuery>(
+    this.query = createQueryClient<Query>(
       params.generatedSchema,
       this.request.bind(this),
     )
 
-    this.mutation = createMutationClient<GeneratedMutation>(
+    this.mutation = createMutationClient<Mutation>(
       params.generatedSchema,
       this.request.bind(this),
     )
 
-    this.subscription = {} as GeneratedSubscription
+    this.subscription = {} as Subscription
   }
 
   /** @deprecated Axios will be replaced by cross-fetch in the near future. Only the headers configuration will be kept. */
@@ -80,7 +80,7 @@ export class NhostGraphqlClient<
    * const { data, error } = await nhost.graphql.request(CUSTOMERS)
    * ```
    *
-   * @docs https://docs.nhost.io/reference/javascript/nhost-js/graphql/request
+   * @docs https://docs.nhost.io/reference/javascript/graphql/request
    */
   async request<T = any, V = any>(
     document: string | DocumentNode,
@@ -176,7 +176,7 @@ export class NhostGraphqlClient<
    * const url = nhost.graphql.getUrl();
    * ```
    *
-   * @docs https://docs.nhost.io/reference/javascript/nhost-js/graphql/get-url
+   * @docs https://docs.nhost.io/reference/javascript/graphql/get-url
    */
   getUrl(): string {
     return this.url
@@ -190,7 +190,7 @@ export class NhostGraphqlClient<
    * nhost.graphql.setAccessToken('some-access-token')
    * ```
    *
-   * @docs https://docs.nhost.io/reference/javascript/nhost-js/graphql/set-access-token
+   * @docs https://docs.nhost.io/reference/javascript/graphql/set-access-token
    */
   setAccessToken(accessToken: string | undefined) {
     if (!accessToken) {

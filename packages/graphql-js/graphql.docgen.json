@@ -1,9 +1,9 @@
 {
-  "title": "Auth",
-  "path": "./.docgen/auth.json",
-  "output": "../../docs/docs/reference/docgen/javascript/auth",
-  "root": "reference/docgen/javascript/auth",
-  "slug": "/reference/javascript/auth",
+  "title": "GraphQL",
+  "path": "./.docgen/graphql.json",
+  "output": "../../docs/docs/reference/docgen/javascript/graphql",
+  "root": "reference/docgen/javascript/graphql",
+  "slug": "/reference/javascript/graphql",
   "sidebarConfig": "referenceSidebar",
   "baseEditUrl": "https://github.com/nhost/nhost/edit/main/packages",
   "cleanup": true
