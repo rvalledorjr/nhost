@@ -1,5 +1,113 @@
 # @nhost/dashboard
 
+## 0.11.7
+
+### Patch Changes
+
+- e9c8909c: fix(dashboard): use correct theme color in dark mode
+
+## 0.11.6
+
+### Patch Changes
+
+- 902f486b: fix(dashboard): re-enable Hasura on logs page
+
+## 0.11.5
+
+### Patch Changes
+
+- 1f9720fa: fix(dashboard): apply select permissions properly
+
+## 0.11.4
+
+### Patch Changes
+
+- deb14b51: fix(dashboard): don't break billing form
+
+## 0.11.3
+
+### Patch Changes
+
+- @nhost/react-apollo@4.13.3
+- @nhost/nextjs@1.13.3
+
+## 0.11.2
+
+### Patch Changes
+
+- f143e51d: chore(dashboard): pin Turborepo to 1.6.3
+
+## 0.11.1
+
+### Patch Changes
+
+- c2b5a41a: chore(dashboard): select system colors by default
+
+## 0.11.0
+
+### Minor Changes
+
+- 1ebaf429: feat(dashboard): introduce Dark Mode 🌚
+
+### Patch Changes
+
+- 63b445c4: fixed duplicated logs bug and made to date count during live mode
+
+## 0.10.1
+
+### Patch Changes
+
+- e146d32e: chore(deps): update dependency @types/react to v18.0.27
+- 59347fcd: correct allowed role name
+- 5b65cac9: updated authentication documentation
+- 963f9b5e: feat(dashboard): include project info in feedback
+
+## 0.10.0
+
+### Minor Changes
+
+- ed4c7801: chore(dashboard): remove Functions section
+
+## 0.9.10
+
+### Patch Changes
+
+- 4e2f8ccd: fix(dashboard): don't break Auth page in local mode
+
+## 0.9.9
+
+### Patch Changes
+
+- 31abbe5f: fix(dashboard): enable toggle when settings are filled in
+
+## 0.9.8
+
+### Patch Changes
+
+- 5bdd31ad: chore(dashboard): list fewer images per page on the Storage page
+- 5121851c: fix(dashboard): don't throw validation error for valid permission rules
+
+## 0.9.7
+
+### Patch Changes
+
+- c126b20d: fix(dashboard): correct redeployment button
+
+## 0.9.6
+
+### Patch Changes
+
+- 36c3519c: feat(dashboard): retrigger deployments
+
+## 0.9.5
+
+### Patch Changes
+
+- 200e9f77: chore(deps): update dependency @types/react-dom to v18.0.10
+- Updated dependencies [200e9f77]
+  - @nhost/nextjs@1.13.2
+  - @nhost/react-apollo@4.13.2
+
 ## 0.9.4
 
 ### Patch Changes

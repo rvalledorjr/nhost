@@ -1,26 +1,22 @@
-import { AppDeploymentDuration } from '@/components/applications/AppDeployments';
-import { EditRepositorySettings } from '@/components/applications/github/EditRepositorySettings';
 import useGitHubModal from '@/components/applications/github/useGitHubModal';
-import { useDialog } from '@/components/common/DialogProvider';
-import NavLink from '@/components/common/NavLink';
+import DeploymentListItem from '@/components/deployments/DeploymentListItem';
 import GithubIcon from '@/components/icons/GithubIcon';
 import { useCurrentWorkspaceAndApplication } from '@/hooks/useCurrentWorkspaceAndApplication';
-import { Avatar } from '@/ui/Avatar';
-import Status, { StatusEnum } from '@/ui/Status';
-import type { DeploymentStatus } from '@/ui/StatusCircle';
-import { StatusCircle } from '@/ui/StatusCircle';
 import ActivityIndicator from '@/ui/v2/ActivityIndicator';
+import Box from '@/ui/v2/Box';
 import Button from '@/ui/v2/Button';
+import Divider from '@/ui/v2/Divider';
 import RocketIcon from '@/ui/v2/icons/RocketIcon';
-import type { ListItemRootProps } from '@/ui/v2/ListItem';
-import { ListItem } from '@/ui/v2/ListItem';
+import List from '@/ui/v2/List';
 import Text from '@/ui/v2/Text';
 import { getLastLiveDeployment } from '@/utils/helpers';
-import type { DeploymentRowFragment } from '@/utils/__generated__/graphql';
-import { useGetDeploymentsSubSubscription } from '@/utils/__generated__/graphql';
+import {
+  useGetDeploymentsSubSubscription,
+  useScheduledOrPendingDeploymentsSubSubscription,
+} from '@/utils/__generated__/graphql';
 import { ChevronRightIcon } from '@heroicons/react/solid';
-import { formatDistanceToNowStrict, parseISO } from 'date-fns';
-import { twMerge } from 'tailwind-merge';
+import NavLink from 'next/link';
+import { Fragment } from 'react';
 
 function OverviewDeploymentsTopBar() {
   const { currentWorkspace, currentApplication } =
@@ -29,114 +25,21 @@ function OverviewDeploymentsTopBar() {
   const { githubRepository } = currentApplication;
 
   return (
-    <div className="flex flex-row place-content-between pb-6">
-      <Text
-        variant="h3"
-        className="self-center align-middle font-medium text-greyscaleDark"
-      >
+    <div className="grid grid-flow-col gap-2 items-center place-content-between pb-4">
+      <Text variant="h3" className="font-medium">
         Deployments
       </Text>
+
       <NavLink
-        href={
-          !githubRepository
-            ? `#`
-            : `/${currentWorkspace.slug}/${currentApplication.slug}/deployments`
-        }
-        className={twMerge(
-          'cursor-pointer self-center align-middle font-medium text-blue',
-          !githubRepository && 'cursor-not-allowed text-greyscaleGrey',
-        )}
+        href={`/${currentWorkspace.slug}/${currentApplication.slug}/deployments`}
+        passHref
       >
-        View all
-        <ChevronRightIcon className="ml-1 inline-block h-4 w-4" />
+        <Button variant="borderless" disabled={!githubRepository}>
+          View all
+          <ChevronRightIcon className="ml-1 inline-block h-4 w-4" />
+        </Button>
       </NavLink>
     </div>
-  );
-}
-
-interface OverviewDeployProps extends ListItemRootProps {
-  /**
-   * Deployment metadata to display.
-   */
-  deployment: DeploymentRowFragment;
-  /**
-   * Determines to show a status badge showing the live status of a deployment reflecting the latest state of the application.
-   */
-  isDeploymentLive: boolean;
-}
-
-function OverviewDeployment({
-  deployment,
-  isDeploymentLive,
-  className,
-}: OverviewDeployProps) {
-  const { currentWorkspace, currentApplication } =
-    useCurrentWorkspaceAndApplication();
-
-  const relativeDateOfDeployment = formatDistanceToNowStrict(
-    parseISO(deployment.deploymentStartedAt),
-    {
-      addSuffix: true,
-    },
-  );
-
-  const { commitMessage } = deployment;
-
-  return (
-    <ListItem.Root className={twMerge('grid grid-flow-row', className)}>
-      <ListItem.Button
-        className="grid grid-flow-col items-center justify-between gap-2 px-2 py-2"
-        component={NavLink}
-        href={`/${currentWorkspace.slug}/${currentApplication.slug}/deployments/${deployment.id}`}
-      >
-        <div className="flex cursor-pointer flex-row items-center justify-center space-x-2 self-center">
-          <div>
-            <Avatar
-              name={deployment.commitUserName}
-              avatarUrl={deployment.commitUserAvatarUrl}
-              className="h-8 w-8"
-            />
-          </div>
-          <div className="grid grid-flow-row truncate text-sm+ font-medium">
-            <Text className="inline cursor-pointer truncate font-medium leading-snug text-greyscaleDark">
-              {commitMessage?.trim() || (
-                <span className="truncate pr-1 font-normal italic">
-                  No commit message
-                </span>
-              )}
-            </Text>
-            <Text className="text-sm font-normal leading-[1.375rem] text-greyscaleGrey">
-              {relativeDateOfDeployment}
-            </Text>
-          </div>
-        </div>
-        <div className="grid grid-flow-col items-center self-center">
-          {isDeploymentLive && (
-            <div className="flex self-center align-middle">
-              <Status status={StatusEnum.Live}>Live</Status>
-            </div>
-          )}
-
-          <div className="w-20 self-center text-right align-middle font-mono text-sm- font-medium">
-            {deployment.commitSHA.substring(0, 7)}
-          </div>
-          <div className="w-20 self-center text-right align-middle font-mono text-sm-">
-            <AppDeploymentDuration
-              startedAt={deployment.deploymentStartedAt}
-              endedAt={deployment.deploymentEndedAt}
-            />
-          </div>
-          <div className="mx-3 self-center">
-            <StatusCircle
-              status={deployment.deploymentStatus as DeploymentStatus}
-            />
-          </div>
-          <div className="self-center">
-            <ChevronRightIcon className="ml-2 h-4 w-4 cursor-pointer self-center" />
-          </div>
-        </div>
-      </ListItem.Button>
-    </ListItem.Root>
   );
 }
 
@@ -149,8 +52,8 @@ function OverviewDeployments({
   projectId,
   githubRepository,
 }: OverviewDeploymentsProps) {
-  const { openAlertDialog } = useDialog();
-  const { openGitHubModal } = useGitHubModal();
+  const { currentWorkspace, currentApplication } =
+    useCurrentWorkspaceAndApplication();
   const { data, loading } = useGetDeploymentsSubSubscription({
     variables: {
       id: projectId,
@@ -159,11 +62,20 @@ function OverviewDeployments({
     },
   });
 
-  if (loading) {
+  const {
+    data: scheduledOrPendingDeploymentsData,
+    loading: scheduledOrPendingDeploymentsLoading,
+  } = useScheduledOrPendingDeploymentsSubSubscription({
+    variables: {
+      appId: projectId,
+    },
+  });
+
+  if (loading || scheduledOrPendingDeploymentsLoading) {
     return (
-      <div style={{ height: '240px' }}>
+      <Box className="h-[323px] p-2 border-1 rounded-lg">
         <ActivityIndicator label="Loading deployments..." />
-      </div>
+      </Box>
     );
   }
 
@@ -171,9 +83,13 @@ function OverviewDeployments({
 
   if (deployments.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-5 rounded-lg border border-veryLightGray py-12 px-48 shadow-sm">
-        <RocketIcon strokeWidth={1} className="h-10 w-10 text-greyscaleDark" />
-        <div className="flex flex-col space-y-1">
+      <Box className="grid grid-flow-row gap-5 items-center justify-items-center rounded-lg py-12 px-48 shadow-sm border-1">
+        <RocketIcon
+          strokeWidth={1}
+          className="h-10 w-10"
+          sx={{ color: 'text.primary' }}
+        />
+        <div className="grid grid-flow-row gap-2">
           <Text className="text-center font-medium" variant="h3">
             No Deployments
           </Text>
@@ -182,58 +98,56 @@ function OverviewDeployments({
             deployment branch in your connected GitHub repository
           </Text>
         </div>
-        <div className="mt-6 flex h-[46px] w-[372px] flex-row place-content-between rounded-lg bg-card p-3">
-          <div className="flex flex-row">
-            <GithubIcon className="mr-1.5 h-4 w-4 self-center text-black" />
-            <Text
-              variant="body1"
-              className="self-center font-normal text-black"
-            >
+
+        <Box
+          className="mt-6 flex flex-row place-content-between rounded-lg py-2 px-2 max-w-sm w-full"
+          sx={{ backgroundColor: 'grey.200' }}
+        >
+          <Box
+            className="grid grid-flow-col gap-1.5 ml-2"
+            sx={{ backgroundColor: 'transparent' }}
+          >
+            <GithubIcon className="h-4 w-4 self-center" />
+            <Text variant="body1" className="self-center font-normal">
               {githubRepository.fullName}
             </Text>
-          </div>
-          <Button
-            variant="borderless"
-            aria-label="Edit Repository Settings"
-            onClick={() => {
-              openAlertDialog({
-                title: 'Edit Repository Settings',
-                payload: (
-                  <EditRepositorySettings
-                    handleSelectAnotherRepository={openGitHubModal}
-                  />
-                ),
-                props: {
-                  hidePrimaryAction: true,
-                  hideSecondaryAction: true,
-                  hideTitle: true,
-                },
-              });
-            }}
+          </Box>
+
+          <NavLink
+            href={`/${currentWorkspace.slug}/${currentApplication.slug}/settings/git`}
+            passHref
           >
-            Edit
-          </Button>
-        </div>
-      </div>
+            <Button variant="borderless" size="small">
+              Edit
+            </Button>
+          </NavLink>
+        </Box>
+      </Box>
     );
   }
 
-  const getLastLiveDeploymentId = getLastLiveDeployment(deployments);
+  const liveDeploymentId = getLastLiveDeployment(deployments);
+  const { deployments: scheduledOrPendingDeployments } =
+    scheduledOrPendingDeploymentsData;
 
   return (
-    <div className="rounded-x-lg flex flex-col divide-y-1 divide-gray-200 rounded-lg border border-veryLightGray">
-      {deployments.map((deployment) => {
-        const isDeploymentLive = deployment.id === getLastLiveDeploymentId;
-
-        return (
-          <OverviewDeployment
-            key={deployment.id}
+    <List
+      className="rounded-x-lg flex flex-col rounded-lg"
+      sx={{ borderColor: 'grey.300', borderWidth: 1 }}
+    >
+      {deployments.map((deployment, index) => (
+        <Fragment key={deployment.id}>
+          <DeploymentListItem
             deployment={deployment}
-            isDeploymentLive={isDeploymentLive}
+            isLive={deployment.id === liveDeploymentId}
+            showRedeploy={index === 0}
+            disableRedeploy={scheduledOrPendingDeployments.length > 0}
           />
-        );
-      })}
-    </div>
+
+          {index !== deployments.length - 1 && <Divider component="li" />}
+        </Fragment>
+      ))}
+    </List>
   );
 }
 
@@ -260,9 +174,11 @@ export default function OverviewDeploymentsPage() {
   return (
     <div className="flex flex-col">
       <OverviewDeploymentsTopBar />
-      <div className="flex flex-col items-center justify-center space-y-5 rounded-lg border border-veryLightGray py-12 px-48 shadow-sm">
-        <RocketIcon strokeWidth={1} className="h-10 w-10 text-greyscaleDark" />
-        <div className="flex flex-col space-y-1">
+
+      <Box className="grid grid-flow-row gap-5 items-center justify-items-center rounded-lg py-12 px-48 shadow-sm border-1">
+        <RocketIcon strokeWidth={1} className="h-10 w-10" />
+
+        <div className="grid grid-flow-row gap-1">
           <Text className="text-center font-medium" variant="h3">
             No Deployments
           </Text>
@@ -271,19 +187,19 @@ export default function OverviewDeploymentsPage() {
             deployment
           </Text>
         </div>
+
         <div className="flex flex-row place-content-between rounded-lg lg:w-[230px]">
           <Button
             variant="contained"
             color="primary"
             className="w-full"
-            aria-label="Connect a GitHub Repository to the project"
             onClick={openGitHubModal}
           >
-            <GithubIcon className="mr-1.5 h-4 w-4 self-center text-white" />
+            <GithubIcon className="mr-1.5 h-4 w-4 self-center" />
             Connect to GitHub
           </Button>
         </div>
-      </div>
+      </Box>
     </div>
   );
 }
