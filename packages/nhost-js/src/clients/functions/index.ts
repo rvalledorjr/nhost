@@ -1,10 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  RawAxiosRequestHeaders
-} from 'axios'
+import { Axios, AxiosError, AxiosRequestConfig, AxiosResponse, RawAxiosRequestHeaders } from 'axios'
 import { urlFromSubdomain } from '../../utils/helpers'
 import { NhostClientConstructorParams } from '../../utils/types'
 import {
@@ -36,7 +30,7 @@ export function createFunctionsClient(params: NhostClientConstructorParams) {
  */
 export class NhostFunctionsClient {
   readonly url: string
-  private instance: AxiosInstance
+  private instance: Axios
   private accessToken: string | null
   private adminSecret?: string
 
@@ -46,7 +40,7 @@ export class NhostFunctionsClient {
     this.url = url
     this.accessToken = null
     this.adminSecret = adminSecret
-    this.instance = axios.create({
+    this.instance = new Axios({
       baseURL: url
     })
   }

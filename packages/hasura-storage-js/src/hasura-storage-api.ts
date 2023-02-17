@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import axios, { AxiosInstance } from 'axios'
+import { Axios } from 'axios'
 import { toIso88591 } from './utils'
 
 import {
@@ -18,14 +18,14 @@ import {
  */
 export class HasuraStorageApi {
   private url: string
-  private httpClient: AxiosInstance
+  private httpClient: Axios
   private accessToken?: string
   private adminSecret?: string
 
   constructor({ url }: { url: string }) {
     this.url = url
 
-    this.httpClient = axios.create({
+    this.httpClient = new Axios({
       baseURL: this.url
     })
   }

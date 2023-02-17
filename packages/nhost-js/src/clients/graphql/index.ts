@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
+import { Axios, AxiosError, AxiosRequestConfig } from 'axios'
 import { DocumentNode, GraphQLError, print } from 'graphql'
 import { urlFromSubdomain } from '../../utils/helpers'
 import { NhostClientConstructorParams } from '../../utils/types'
@@ -30,7 +30,7 @@ export function createGraphqlClient(params: NhostClientConstructorParams) {
  */
 export class NhostGraphqlClient {
   readonly url: string
-  private instance: AxiosInstance
+  private instance: Axios
   private accessToken: string | null
   private adminSecret?: string
 
@@ -40,7 +40,7 @@ export class NhostGraphqlClient {
     this.url = url
     this.accessToken = null
     this.adminSecret = adminSecret
-    this.instance = axios.create({
+    this.instance = new Axios({
       baseURL: url
     })
   }
@@ -115,6 +115,8 @@ export class NhostGraphqlClient {
           error: responseData.errors
         }
       }
+
+      console.log(responseData)
 
       if (typeof data !== 'object' || Array.isArray(data) || data === null) {
         if (useAxios) {

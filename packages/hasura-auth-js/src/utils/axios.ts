@@ -1,10 +1,10 @@
-import axios, { AxiosError } from 'axios'
+import { Axios, AxiosError } from 'axios'
 
 import { NETWORK_ERROR_CODE } from '../errors'
 import { ErrorPayload } from '../types'
 
 export const nhostApiClient = (backendUrl: string) => {
-  const client = axios.create({ baseURL: backendUrl })
+  const client = new Axios({ baseURL: backendUrl })
 
   client.interceptors.response.use(
     (response) => response,
